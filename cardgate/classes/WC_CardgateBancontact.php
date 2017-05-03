@@ -1,27 +1,27 @@
 <?php
 
 /**
- * Title: WooCommerce Cardgate Banktransfer gateway
+ * Title: WooCommerce Cardgate Creditcard gateway
  * Description: 
  * Copyright: Copyright (c) 2012
  * Company: Cardgate
  * @author Richard Schoots
  * @version 1.0
  */
-class WC_CardgateBanktransfer extends CGP_Common_Gateway {
+class WC_CardgateBancontact extends CGP_Common_Gateway {
 
     /**
      * The unique ID of this payment gateway
      * 
      * @const ID string
      */
-    const ID = 'cardgatebanktransfer';
-    const MethodTitle = 'Cardgate Banktransfer';
-    const AdminTitle = 'Cardgate Banktransfer';
-    const PaymentName = 'Bankoverboeking';
+    const ID = 'cardgatebancontact';
+    const MethodTitle = 'Cardgate Bancontact';
+    const AdminTitle = 'Cardgate Bancontact';
+    const PaymentName = 'Bancontact';
     const Company = 'Cardgate';
     const HasFields = false;   //extra field for bank data
-    const PaymentMethod = 'banktransfer';
+    const PaymentMethod = 'bancontact';
 
     //////////////////////////////////////////////////
     var $bankOption;
@@ -30,6 +30,10 @@ class WC_CardgateBanktransfer extends CGP_Common_Gateway {
      * Constructs and initialize a gateway
      */
     public function __construct() {
+
+        $this->supports = array( 
+            'products',
+        );
 
         $this->id = self::ID;
         $this->method_title = self::MethodTitle;
@@ -54,5 +58,7 @@ class WC_CardgateBanktransfer extends CGP_Common_Gateway {
         // Actions
         add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
         add_action( 'woocommerce_receipt_' . self::ID, array( $this, 'receiptPage' ) );
+
     }
+
 }
