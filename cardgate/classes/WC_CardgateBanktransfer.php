@@ -21,7 +21,7 @@ class WC_CardgateBanktransfer extends CGP_Common_Gateway {
     const PaymentName = 'Bankoverboeking';
     const Company = 'Cardgate';
     const HasFields = false;   //extra field for bank data
-    const PaymentMethod = 'banktransfer';
+    const PaymentMethod = 'bancontact';
 
     //////////////////////////////////////////////////
     var $bankOption;

@@ -262,7 +262,7 @@ class Cardgate_PaymentsListTable extends WP_List_Table {
         $page_args = $this->_pagination_args;
         extract( $page_args );
 
-        $output = '<span class="displaying-num">' . sprintf( _n( '1 item', '%s items', $total_items ), number_format_i18n( $total_items ) ) . '</span>';
+        $output = '<span class="displaying-num">' . sprintf( _n( '%s item', '%s items', $total_items ), number_format_i18n( $total_items ) ) . '</span>';
 
         $current = $this->get_pagenum();
 

@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Plugin Name: CardGate
- * Plugin URI: http://cardgate.com
- * Description: Integrates Cardgate Gateway for Woocommerce into WordPress
- *
- * Version: 3.0.0
- * Requires at least: 3.0
- *
- * Author: CardGate
- * Author URI: http://cardgate.com
- *
- * License: GPL
+  Plugin Name: CardGate
+  Plugin URI: http://cardgate.com
+  Description: Integrates Cardgate Gateway for WooCommerce into WordPress
+ 
+  Version: 3.0.0
+  Requires at least: 3.0
+ 
+  Author: CardGate
+  Author URI: http://cardgate.com
+ 
+  License: GPL
  */
 class cardgate
 {
@@ -222,7 +222,6 @@ class cardgate
     static function cardgate_config_page()
     {
         global $wpdb;
-        $aCGPTranslations = get_option('cardgate_translations');
         
         $icon_file = plugins_url('images/cardgate.png', __FILE__);
         
@@ -346,7 +345,6 @@ class cardgate
      */
     static function cardgate_payments_table()
     {
-        $aCGPTranslations = get_option('cardgate_translations');
         global $wp_list_table;
         $wp_list_table = new Cardgate_PaymentsListTable();
         $icon_file = plugins_url('images/cardgate.png', __FILE__);
@@ -379,7 +377,6 @@ class cardgate
      */
     public static function CGPAdminMenu()
     {
-        $aCGPTranslations = get_option('cardgate_translations');
         
         add_menu_page('cardgate', $menuTitle = 'CardGate', $capability = 'manage_options', $menuSlug = 'cardgate_menu', $function = array(
             __CLASS__,
@@ -459,13 +456,14 @@ class cardgate
             try {
                 require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
                     
-                $bIsTest = ($_REQUEST['test_mode'] == 1 ? true : false);
+                $bIsTest = ($_REQUEST['testmode'] == 1 ? true : false);
+                $bIsTest = true;
                 $aResult = cardgate\api\Client::pullConfig($_REQUEST['token'], $bIsTest);
                 
                 $aConfigData = $aResult['pullconfig']['content'];
-                update_option('cgp_mode', $aConfigData['test_mode']);
+                update_option('cgp_mode', $aConfigData['testmode']);
                 update_option('cgp_siteid', $aConfigData['site_id']);
-                update_option('cgp_hashkey', $aConfigData['hash_key']);
+                update_option('cgp_hashkey', $aConfigData['site_key']);
                 update_option('cgp_merchant_id', $aConfigData['merchant_id']);
                 update_option('cgp_merchant_api_key', $aConfigData['api_key']);
             } catch (cardgate\api\Exception $oException_) {
@@ -474,7 +472,7 @@ class cardgate
                     'name' => htmlspecialchars($oException_->getMessage())
                 ];
             }
- 
+
         }
         
         // check that the callback came from CardGate
@@ -555,7 +553,6 @@ class cardgate
     {
         if ($_REQUEST['cancel_order'] == TRUE || $_REQUEST['cancel_order'] == 'true' && strpos($_REQUEST['transaction'], 'T') && $_REQUEST['status'] == 'failure') {
             wc_clear_notices();
-            $aCGPTranslations = get_option('cardgate_translations');
             wc_add_notice(__('Your payment has failed. Please choose an other payment method.', 'cardgate'), 'error');
         }
         return TRUE;
@@ -707,6 +704,7 @@ class cardgate
     function woocommerce_cardgate_add_gateways($methods)
     {
         $methods[] = 'WC_CardgateAfterpay';
+        $methods[] = 'WC_CardgateBancontact';
         $methods[] = 'WC_CardgateBanktransfer';
         $methods[] = 'WC_CardgateBitcoin';
         $methods[] = 'WC_CardgateCreditcard';
@@ -714,7 +712,6 @@ class cardgate
         $methods[] = 'WC_CardgateGiropay';
         $methods[] = 'WC_CardgateIdeal';
         $methods[] = 'WC_CardgateKlarna';
-        $methods[] = 'WC_CardgateMistercash';
         $methods[] = 'WC_CardgatePayPal';
         $methods[] = 'WC_CardgatePrzelewy24';
         $methods[] = 'WC_CardgateSofortbanking';
@@ -771,7 +768,6 @@ class cardgate
     {
         global $woocommerce;
         
-        $aCGPTranslations = get_option('cardgate_translations');
         // Get current tab/section
         $current_tab = (empty($_GET['tab'])) ? '' : sanitize_text_field(urldecode($_GET['tab']));
         $current_section = (empty($_REQUEST['section'])) ? '' : sanitize_text_field(urldecode($_REQUEST['section']));

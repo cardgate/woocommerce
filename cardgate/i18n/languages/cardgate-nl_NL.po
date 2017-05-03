@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CardGate\n"
-"POT-Creation-Date: 2017-05-01 12:59+0200\n"
-"PO-Revision-Date: 2017-05-01 13:00+0200\n"
+"POT-Creation-Date: 2017-05-02 14:25+0200\n"
+"PO-Revision-Date: 2017-05-02 14:25+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: nl_NL\n"
@@ -55,7 +55,7 @@ msgstr "De Codeersleutel zoals ingevuld in uw "
 
 #: cardgate.php:306
 msgid "De Merchant ID as created in your "
-msgstr "De Merchant ID zoals aangemaakt in uw"
+msgstr "De Merchant ID zoals aangemaakt in uw "
 
 #: cardgate.php:312
 msgid "Merchant API Key"
@@ -168,7 +168,7 @@ msgstr "Betaal met "
 
 #: classes/CGP_Common_Gateway.php:473
 msgid " Choose your bank first, please"
-msgstr "Kies eerst uw bank a.u.b."
+msgstr "Kies eerst uw bank a.u.b"
 
 #: classes/Cardgate_PaymentsListTable.php:111
 msgid "No payments found."
@@ -196,10 +196,10 @@ msgstr "Betaal Status"
 
 #: classes/Cardgate_PaymentsListTable.php:265
 #, php-format
-msgid "1 item"
+msgid "%s item"
 msgid_plural "%s items"
-msgstr[0] "1 artikel"
-msgstr[1] ""
+msgstr[0] "%s item"
+msgstr[1] "%s items"
 
 #: classes/Cardgate_PaymentsListTable.php:285
 msgid "Go to the first page"
@@ -237,5 +237,5 @@ msgid "http://cardgate.com"
 msgstr "http://cardgate.com"
 
 #. Description of the plugin/theme
-msgid "Integrates Cardgate Gateway for Woocommerce into WordPress"
-msgstr "Integratie van CardGate Gateway voor Woocommerce in WordPress"
+msgid "Integrates Cardgate Gateway for WooCommerce into WordPress"
+msgstr "Integratie van CardGate Gateway voor WooCommerce in WordPress"

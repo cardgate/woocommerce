@@ -1,30 +1,32 @@
 === WooCommerce - CardGate Payment Options ===
 Plugin Name: CardGate Payment for WooCommerce
 Contributors: cardgate
-Donate link: https://www.cardgate.com
 Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, MisterCash, SofortBanking, OverBoeking, PayPal, Giropay, DirectDebit, Webmoney
-Requires at least: 3.0.1
-Tested up to: 4.3.1
-Stable tag: 2.1.13
-License: GPLv2 or later
+Requires at least: 4.4
+Tested up to: 4.7
+Stable tag: 3.0.0
+License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-CardGate Payment methods for WooCommerce 2.X
+CardGate Payment methods for WooCommerce 3.X
 
 == Description ==
 
 This plug-in contains the following payment methods from CardGate for WooCommerce:
 
 <ul>
-<li>CreditCard</li>
-<li>iDEAL</li>
-<li>MisterCash</li>
-<li>SofortBanking</li>
+<li>Afterpay</li>
 <li>Banktransfer</li>
-<li>PayPal</li>
-<li>Giropay</li>
+<li>Bitcoin</li>
+<li>Creditcard</li>
 <li>DirectDebit</li>
-<li>Webmoney</li>
+<li>Giropay</li>
+<li>iDEAL</li>
+<li>Klarna</li>
+<li>MisterCash</li>
+<li>PayPal</li>
+<li>Przelewy24</li>
+<li>Sofortbanking</li>
 </ul>
 
 == Installation ==
@@ -51,5 +53,5 @@ To make use of this plug-in you need an account from CardGate
 Please contact us at www.cardgate.com
 
 == Changelog ==
-= 2.2.0 =
+= 3.0.0 =
 Plugin now available via wordpress.org

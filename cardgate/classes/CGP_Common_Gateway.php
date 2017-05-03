@@ -40,7 +40,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway
      */
     function generate_bank_html()
     {
-        $aCGPTranslations = get_option('cardgate_translations');
         $aIssuers = $this->getBankOptions();
         
         $html = '<fieldset>
@@ -466,7 +465,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway
     function validate_fields()
     {
         global $woocommerce;
-        $aCGPTranslations = get_option('cardgate_translations');
         
         if ($_POST['payment_method'] == 'cardgateideal') {
             if (empty($_POST['cgp_bank_options']) || $_POST['cgp_bank_options'] == '0') {
