@@ -383,7 +383,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway
             
             $nr ++;
             $items[$nr]['type'] = 'product';
-            $items[$nr]['model'] = $oProduct->get_sku();
+            $items[$nr]['model'] = $this->formatSku($oProduct);
             $items[$nr]['name'] = $oProduct->get_name();
             $items[$nr]['quantity'] = $iQty;
             $items[$nr]['price_wt'] = $iPrice;
@@ -512,5 +512,15 @@ class CGP_Common_Gateway extends WC_Payment_Gateway
     
     function getLanguage(){
         return substr(get_locale(),0,2);
+    }
+    
+    private function formatSku($oProduct){
+        $sSku = $oProduct->get_sku();
+        
+        if($sSku == null || $sSku == ''){
+            return 'SKU_'.$oProduct->get_id();
+        } else {
+            return $sSku;
+        }
     }
 }

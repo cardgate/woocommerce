@@ -5,7 +5,7 @@
   Plugin URI: http://cardgate.com
   Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  
-  Version: 3.0.0
+  Version: 3.0.1
   Requires at least: 3.0
  
   Author: CardGate
