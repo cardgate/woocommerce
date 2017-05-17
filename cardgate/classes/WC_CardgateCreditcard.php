@@ -31,14 +31,7 @@ class WC_CardgateCreditcard extends CGP_Common_Gateway {
     public function __construct() {
 
         $this->supports = array( 
-            'products', 
-            'subscriptions',
-            'subscription_cancellation', 
-            'subscription_suspension', 
-            'subscription_reactivation',
-            'subscription_amount_changes',
-            // 'subscription_date_changes',
-            // 'subscription_payment_method_change'
+            'products'
         );
 
         $this->id = self::ID;

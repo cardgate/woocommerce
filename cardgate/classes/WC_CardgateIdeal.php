@@ -17,17 +17,11 @@ class WC_CardgateIdeal extends CGP_Common_Gateway
      * @const ID string
      */
     const ID = 'cardgateideal';
-
     const MethodTitle = 'Cardgate iDEAL';
-
     const AdminTitle = 'Cardgate iDEAL';
-
     const PaymentName = 'iDEAL';
-
     const Company = 'Cardgate';
-
-    const HasFields = true;
- // extra field for bank data
+    const HasFields = true; // extra field for bank data
     const PaymentMethod = 'idealpro';
     
     // ////////////////////////////////////////////////

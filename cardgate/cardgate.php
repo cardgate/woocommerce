@@ -1,17 +1,17 @@
 <?php
 
 /**
-  Plugin Name: CardGate
-  Plugin URI: http://cardgate.com
-  Description: Integrates Cardgate Gateway for WooCommerce into WordPress
+ Plugin Name: CardGate
+ Plugin URI: http://cardgate.com
+ Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  
-  Version: 3.0.1
-  Requires at least: 3.0
+ Version: 3.0.4
+ Requires at least: 3.0
  
-  Author: CardGate
-  Author URI: http://cardgate.com
+ Author: CardGate
+ Author URI: http://cardgate.com
  
-  License: GPL
+ License: GPL
  */
 class cardgate
 {
@@ -224,6 +224,7 @@ class cardgate
         global $wpdb;
         
         $icon_file = plugins_url('images/cardgate.png', __FILE__);
+        $message = '';
         
         if (isset($_POST['Submit'])) {
             if (empty($_POST) || ! wp_verify_nonce($_POST['nonce134'], 'action854')) {
@@ -236,11 +237,27 @@ class cardgate
                 update_option('cgp_hashkey', $_POST['cgp_hashkey']);
                 update_option('cgp_merchant_id', $_POST['cgp_merchant_id']);
                 update_option('cgp_merchant_api_key', $_POST['cgp_merchant_api_key']);
+                
+                $bIsTest = ($_POST['cgp_mode'] == 1 ? TRUE : FALSE);
+                $iMerchantId = (int) $_POST['cgp_merchant_id'];
+                $sMerchantApiKey = $_POST['cgp_merchant_api_key'];
+                
+                $c = new cardgate();
+                $iSiteId = (int) $_POST['cgp_siteid'];
+                $aMethods = $c->get_methods($iSiteId, $iMerchantId, $sMerchantApiKey, $bIsTest);
+                $oMethod = $aMethods[0];
+         
+                if (! is_object($oMethod)) {
+                    $message = __('The settings are not correct for the Mode you chose.<br>For instructions on how to obtain the correct values, please consult our plugin manual at ','cardgate').'<a href="https://www.cardgate.com/plugins/">CardGate</a>';
+                }
+                $aMethods = $oMethod = null;
             }
         }
         
+       
+        
         if (get_option('cgp_siteid') != '' && get_option('cgp_hashkey') != '') {
-            $sNotice = '';
+            $sNotice = $message;
         } else {
             $sNotice = __('The CardGate payment methods will only be visible in the WooCommerce Plugin, once the Site ID and Hashkey have been filled in.', 'cardgate');
         }
@@ -377,7 +394,6 @@ class cardgate
      */
     public static function CGPAdminMenu()
     {
-        
         add_menu_page('cardgate', $menuTitle = 'CardGate', $capability = 'manage_options', $menuSlug = 'cardgate_menu', $function = array(
             __CLASS__,
             'cardgate_config_page'
@@ -455,24 +471,18 @@ class cardgate
             
             try {
                 require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
-                    
                 $bIsTest = ($_REQUEST['testmode'] == 1 ? true : false);
-                $bIsTest = true;
                 $aResult = cardgate\api\Client::pullConfig($_REQUEST['token'], $bIsTest);
-                
                 $aConfigData = $aResult['pullconfig']['content'];
                 update_option('cgp_mode', $aConfigData['testmode']);
                 update_option('cgp_siteid', $aConfigData['site_id']);
                 update_option('cgp_hashkey', $aConfigData['site_key']);
                 update_option('cgp_merchant_id', $aConfigData['merchant_id']);
                 update_option('cgp_merchant_api_key', $aConfigData['api_key']);
+                die($aConfigData['merchant'] . '.' . get_option('cgp_siteid') . '.200');
             } catch (cardgate\api\Exception $oException_) {
-                $aResult[0] = [
-                    'id' => 'exception_message',
-                    'name' => htmlspecialchars($oException_->getMessage())
-                ];
+                die(htmlspecialchars($oException_->getMessage()));
             }
-
         }
         
         // check that the callback came from CardGate
@@ -890,6 +900,24 @@ class cardgate
     public function plugin_url()
     {
         return $this->plugin_url = untrailingslashit(plugins_url('/', __FILE__));
+    }
+
+    private function get_methods($iSiteId, $iMerchantId, $sMerchantApiKey, $bIsTest)
+    {
+        try {
+            require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
+            
+            $oCardGate = new cardgate\api\Client($iMerchantId, $sMerchantApiKey, $bIsTest);
+            $oCardGate->setIp($_SERVER['REMOTE_ADDR']);
+            
+            $oMethods = $oCardGate->methods()->all($iSiteId);
+        } catch (cardgate\api\Exception $oException_) {
+            $oMethods[0] = [
+                'id' => 0,
+                'name' => htmlspecialchars($oException_->getMessage())
+            ];
+        }
+        return $oMethods;
     }
 }
 
