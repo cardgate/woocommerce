@@ -53,5 +53,5 @@ To make use of this plug-in you need an account from CardGate
 Please contact us at www.cardgate.com
 
 == Changelog ==
-= 3.0.0 =
+= 3.0.4 =
 Plugin now available via wordpress.org
