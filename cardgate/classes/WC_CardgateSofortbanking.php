@@ -58,31 +58,11 @@ class WC_CardgateSofortbanking extends CGP_Common_Gateway {
         // Actions
         add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
         add_action( 'woocommerce_receipt_' . self::ID, array( $this, 'receiptPage' ) );
-        add_action( 'cancelled_subscription_' . self::ID,array(&$this,'cancel_subscription'), 10, 2 );
-        add_action( 'subscription_put_on-hold_' . self::ID,array(&$this,'suspend_subscription'), 10, 2 );
-        add_action( 'reactivated_subscription_' . self::ID,array(&$this, 'reactivate_subscription'), 10, 2 );
-    }
+     }
 
     function cancel_subscription( $order, $product_id = '', $profile_id = '' ) {
 
         $status = 'cancel';
         parent::change_subscription( $order, $status );
     }
-
-    function suspend_subscription( $order, $product_id ) {
-
-        $status = 'suspend';
-        parent::change_subscription( $order, $status );
-    }
-
-    function reactivate_subscription( $order, $product_id ) {
-        $status = 'reactivate';
-        parent::change_subscription( $order, $status );
-    }
-    
-    function trash_subscription ($order){
-        $status = 'deactivate';
-        parent::change_subscription( $order, $status );
-    }
-
 }

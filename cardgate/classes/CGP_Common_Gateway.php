@@ -160,13 +160,14 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$bIsTest = (get_option ( 'cgp_mode' ) == 1 ? true : false);
 			$sLanguage = substr ( get_locale (), 0, 2 );
 			$oOrder = new WC_Order ( $iOrderId );
+			$sVersion = ($this->get_woocommerce_version () == '' ? 'unkown' : $this->get_woocommerce_version ());
 			
 			$oCardGate = new cardgate\api\Client ( ( int ) $iMerchantId, $sMerchantApiKey, $bIsTest );
 			
 			$oCardGate->setIp ( $_SERVER ['REMOTE_ADDR'] );
 			$oCardGate->setLanguage ( $sLanguage );
 			$oCardGate->version ()->setPlatformName ( 'Woocommerce' );
-			$oCardGate->version ()->setPlatformVersion ( $this->get_woocommerce_version () );
+			$oCardGate->version ()->setPlatformVersion ( $sVersion );
 			$oCardGate->version ()->setPluginName ( 'CardGate' );
 			$oCardGate->version ()->setPluginVersion ( get_option ( 'cardgate_version' ) );
 			
@@ -175,23 +176,32 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$currency = get_woocommerce_currency ();
 			
 			$oTransaction = $oCardGate->transactions ()->create ( $iSiteId, $amount, $currency );
-			
+		
 			// Configure payment option.
 			$oTransaction->setPaymentMethod ( $this->payment_method );
 			if ($this->payment_method == 'idealpro') {
 				$oTransaction->setIssuer ( $this->bankOption );
 			}
+			method_exists ( $oOrder, 'get_billing_email' ) ? $billing_email = $oOrder->get_billing_email () : $billing_email = $oOrder->billing_email;
+			method_exists ( $oOrder, 'get_billing_first_name' ) ? $billing_first_name = $oOrder->get_billing_first_name () : $billing_first_name = $oOrder->billing_first_name;
+			method_exists ( $oOrder, 'get_billing_last_name' ) ? $billing_last_name = $oOrder->get_billing_last_name () : $billing_last_name = $oOrder->billing_last_name;
+			method_exists ( $oOrder, 'get_billing_last_name' ) ? $billing_last_name = $oOrder->get_billing_last_name () : $billing_last_name = $oOrder->billing_last_name;
+			method_exists ( $oOrder, 'get_billing_address_1' ) ? $billing_address_1 = $oOrder->get_billing_address_1 () : $billing_address_1 = $oOrder->billing_address_1;
+			method_exists ( $oOrder, 'get_billing_address_2' ) ? $billing_address_2 = $oOrder->get_billing_address_2 () : $billing_address_2 = $oOrder->billing_address_2;
+			method_exists ( $oOrder, 'get_billing_postcode' ) ? $billing_postcode = $oOrder->get_billing_postcode () : $billing_postcode = $oOrder->billing_postcode;
+			method_exists ( $oOrder, 'get_billing_city' ) ? $billing_city = $oOrder->get_billing_city () : $billing_city = $oOrder->billing_city;
+			method_exists ( $oOrder, 'get_billing_country' ) ? $billing_country = $oOrder->get_billing_country () : $billing_country = $oOrder->billing_country;
 			
 			// Configure customer.
 			$oCustomer = $oTransaction->getCustomer ();
-			$oCustomer->setEmail ( $oOrder->get_billing_email () );
-			$oCustomer->address ()->setFirstName ( $oOrder->get_billing_first_name () );
-			$oCustomer->address ()->setLastName ( $oOrder->get_billing_last_name () );
-			$oCustomer->address ()->setAddress ( trim ( $oOrder->get_billing_address_1 () . ' ' . $oOrder->get_billing_address_2 () ) );
-			$oCustomer->address ()->setZipCode ( $oOrder->get_billing_postcode () );
-			$oCustomer->address ()->setCity ( $oOrder->get_billing_city () );
-			$oCustomer->address ()->setCountry ( $oOrder->get_billing_country () );
-			
+			$oCustomer->setEmail ( $billing_email );
+			$oCustomer->address ()->setFirstName ( $billing_first_name );
+			$oCustomer->address ()->setLastName ( $billing_last_name );
+			$oCustomer->address ()->setAddress ( trim ( $billing_address_1 . ' ' . $billing_address_2 ) );
+			$oCustomer->address ()->setZipCode ( $billing_postcode );
+			$oCustomer->address ()->setCity ( $billing_city );
+			$oCustomer->address ()->setCountry ( $billing_country );
+		
 			$oCart = $oTransaction->getCart ();
 			$aCartItems = $this->getCartItems ( $iOrderId );
 			
@@ -216,11 +226,17 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 				$oItem->setVat ( $item ['vat'] );
 				$oItem->setVatAmount ( $item ['vat_amount'] );
 				$oItem->setVatIncluded ( 0 );
+			}	
+			if (method_exists ( $oOrder, 'get_cancel_order_url_raw' )){
+				$sCanceUrl = $oOrder->get_cancel_order_url_raw ();
+			} else {
+				
+				$sCanceUrl = $oOrder->get_cancel_order_url ();
 			}
 			
 			$oTransaction->setCallbackUrl ( site_url () . '/index.php?cgp_notify=true' );
 			$oTransaction->setSuccessUrl ( $this->get_return_url ( $oOrder ) );
-			$oTransaction->setFailureUrl ( $oOrder->get_cancel_order_url_raw () );
+			$oTransaction->setFailureUrl ( $sCanceUrl);
 			
 			$oTransaction->setReference ( 'O' . time () . $iOrderId );
 			$oTransaction->setDescription ( 'Order ' . $this->swap_order_number ( $iOrderId ) );
@@ -361,18 +377,31 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		// any discount will be already calculated in the item total
 		$aOrder_items = $oOrder->get_items ();
 		foreach ( $aOrder_items as $oItem ) {
-			
-			$oProduct = $oItem->get_product ();
-			$iQty = $oItem->get_quantity ();
-			$iPrice = round ( ($oItem->get_total () * 100) / $iQty );
-			$iTax = round ( ($oItem->get_total_tax () * 100) / $iQty );
-			$iTotal = round ( $iPrice + $iTax );
-			$iTaxrate = ($iTax > 0 ? round ( ($iTotal / $iPrice - 1) * 100, 2 ) : 0);
+			if (is_object ( $oItem )) {
+				$oProduct = $oItem->get_product ();
+				$sName = $oProduct->get_name ();
+				$sModel = $this->formatSku ( $oProduct );
+				$iQty = $oItem->get_quantity ();
+				$iPrice = round ( ($oItem->get_total () * 100) / $iQty );
+				$iTax = round ( ($oItem->get_total_tax () * 100) / $iQty );
+				$iTotal = round ( $iPrice + $iTax );
+				$iTaxrate = ($iTax > 0 ? round ( ($iTotal / $iPrice - 1) * 100, 2 ) : 0);
+			} else {
+				$aItem = $oItem;
+				$sName = $aItem ['name'];
+				$sModel = 'product_' . $aItem ['item_meta'] ['_product_id'] [0];
+				$oProduct = $oOrder->get_product_from_item ( $aItem );
+				$iQty = ( int ) $aItem ['item_meta'] ['_qty'] [0];
+				$iPrice = round ( ($oOrder->get_item_total ( $aItem, false, false ) * 100) / $iQty );
+				$iTax = round ( ($oOrder->get_item_tax ( $aItem, false ) * 100) / $iQty );
+				$iTotal = round ( $iPrice + $iTax );
+				$iTaxrate = ($iTax > 0 ? round ( ($iTotal / $iPrice - 1) * 100, 2 ) : 0);
+			}
 			
 			$nr ++;
 			$items [$nr] ['type'] = 'product';
-			$items [$nr] ['model'] = $this->formatSku ( $oProduct );
-			$items [$nr] ['name'] = $oProduct->get_name ();
+			$items [$nr] ['model'] = $sModel;
+			$items [$nr] ['name'] = $sName;
 			$items [$nr] ['quantity'] = $iQty;
 			$items [$nr] ['price_wt'] = $iPrice;
 			$items [$nr] ['vat'] = $iTaxrate;
@@ -389,16 +418,26 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		
 		if (! empty ( $aShipping_methods ) && is_array ( $aShipping_methods )) {
 			foreach ( $aShipping_methods as $oShipping ) {
-				
-				$iPrice = round ( $oShipping->get_total () * 100 );
-				$iTax = round ( $oShipping->get_total_tax () * 100 );
-				$iTotal = round ( $iPrice + $iTax );
-				$iTaxrate = ($iTax > 0 ? round ( ($iTotal / $iPrice - 1) * 100, 2 ) : 0);
-				
+				if (is_object ( $oShipping )) {
+					$sName = $oShipping->get_name ();
+					$sModel = $oShipping->get_type ();
+					$iPrice = round ( $oShipping->get_total () * 100 );
+					$iTax = round ( $oShipping->get_total_tax () * 100 );
+					$iTotal = round ( $iPrice + $iTax );
+					$iTaxrate = ($iTax > 0 ? round ( ($iTotal / $iPrice - 1) * 100, 2 ) : 0);
+				} else {
+					$aShipping = $oShipping;
+					$sName = $aShipping ['name'];
+					$sModel = 'shipping_' . $aShipping ['item_meta'] ['method_id'] [0];
+					$iPrice = round ( $oOrder->get_total_shipping () * 100 );
+					$iTax = round ( $oOrder->get_shipping_tax () * 100 );
+					$iTotal = round ( $iPrice + $iTax );
+					$iTaxrate = ($iTax > 0 ? round ( ($iTotal / $iPrice - 1) * 100, 2 ) : 0);
+				}
 				$nr ++;
 				$items [$nr] ['type'] = 'shipping';
-				$items [$nr] ['model'] = $oShipping->get_type ();
-				$items [$nr] ['name'] = $oShipping->get_name ();
+				$items [$nr] ['model'] = $sModel;
+				$items [$nr] ['name'] = $sName;
 				$items [$nr] ['quantity'] = 1;
 				$items [$nr] ['price_wt'] = $iPrice;
 				$items [$nr] ['vat'] = $iTaxrate;
@@ -475,7 +514,12 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			require_once (ABSPATH . 'wp-admin/includes/plugin.php');
 		$plugin_folder = get_plugins ( '/woocommerce' );
 		$plugin_file = 'woocommerce.php';
-		return $plugin_folder [$plugin_file] ['Version'];
+		
+		if (array_key_exists ( $plugin_file, $plugin_folder )) {
+			return $plugin_folder [$plugin_file] ['Version'];
+		} else {
+			return 'unknown';
+		}
 	}
 	
 	// ////////////////////////////////////////////////

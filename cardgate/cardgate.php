@@ -5,8 +5,8 @@
  Plugin URI: http://cardgate.com
  Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  
- Version: 3.0.4
- Requires at least: 3.0
+ Version: 3.1.0
+ Requires at least: 4.4
  
  Author: CardGate
  Author URI: http://cardgate.com
@@ -60,10 +60,6 @@ class cardgate {
 				&$this,
 				'initiate_payment_classes' 
 		) );
-		add_filter ( 'woocommerce_subscriptions_list_table_pre_process_actions', array (
-				&$this,
-				'subscription_preaction' 
-		), 20 );
 		update_option ( 'is_callback_status_change', false );
 		
 		add_action ( 'woocommerce_cancelled_order', array (
@@ -275,10 +271,6 @@ class cardgate {
 									<option value="1"' . (get_option ( 'cgp_mode' ) == '1' ? ('selected="selected"') : '') . '>Test</option>
 									<option value="0"' . (get_option ( 'cgp_mode' ) == '0' ? ('selected="selected"') : '') . '>Live</option>
 								</select>
-								<span class="description">
-									<br>
-									' . __ ( 'Live or Test mode of the plugin.', 'cardgate' ) . '
-								</span>
 						</td>
 					</tr>
 					<tr>
@@ -286,10 +278,6 @@ class cardgate {
                         <label for="cgp_siteid">Site ID</label>
                         </th>
                         <td><input type="text" style="width:60px;" id="cgp_siteid" name="cgp_siteid" value="' . get_option ( 'cgp_siteid' ) . '" />
-                        <span class="description">
-                                    <br>
-                                    ' . __ ( 'The Site ID as created in your ', 'cardgate' ) . '<a href="https://my.cardgate.com/">merchant back-office.</a>
-                                </span>
                         </td>
                     </tr>
 					<tr>
@@ -297,10 +285,6 @@ class cardgate {
 						<label for="cgp_hashkey">' . __ ( 'Hashkey', 'cardgate' ) . '</label>
 						</th>
 						<td><input type="text" style="width:150px;" id="cgp_hashkey" name="cgp_hashkey" value="' . get_option ( 'cgp_hashkey' ) . '"/>
-						<span class="description">
-									<br>
-									' . __ ( 'The Hashkey as entered in your ', 'cardgate' ) . ' <a href="https://my.cardgate.com/">merchant back-office.</a>
-								</span>
 						</td>
 					</tr>
 		            <tr>
@@ -308,10 +292,6 @@ class cardgate {
 						<label for="cgp_merchant_id">Merchant ID</label>
 						</th>
 						<td><input type="text" style="width:60px;" id="cgp_merchant_id" name="cgp_merchant_id" value="' . get_option ( 'cgp_merchant_id' ) . '"/>
-						<span class="description">
-									<br>
-									' . __ ( 'De Merchant ID as created in your ', 'cardgate' ) . ' <a href="https://my.cardgate.com/">merchant back-office.</a>
-								</span>
 						</td>
 					</tr>
 				    <tr> 
@@ -319,11 +299,10 @@ class cardgate {
 						<label for="cgp_merchant_api_key">' . __ ( 'Merchant API Key', 'cardgate' ) . '</label>
 						</th>
 						<td><input type="text" style="width:600px;" id="cgp_merchant_api_key" name="cgp_merchant_api_key" value="' . get_option ( 'cgp_merchant_api_key' ) . '"/>
-						<span class="description">
-									<br>
-									' . __ ( 'The Merchant API Key, provided by our acount manager ', 'cardgate' ) . '</a>
-								</span>
 						</td>
+					</tr>
+					<tr>
+						<td colspan="2">' . __ ( '<b>Use the Settings button</b> in your <a href="https://my.cardgate.com/">merchant back-office</a> to set all these values, as explained in the <a href="https://www.cardgate.com/en/plug_in/woocommerce/?link=WooCommerce3x-1-manual" target="_blank">installation instructions</a> of this plugin.', 'cardgate' ) . '</td>
 					</tr>
 					<tr>
 						<td colspan="2">' . __ ( 'These settings apply to all CardGate payment methods used in the WooCommerce plugin.', 'cardgate' ) . '</td>
@@ -482,7 +461,7 @@ class cardgate {
 			
 			// Refurbish the ref so we get the orderno
 			$sOrderType = substr ( $_REQUEST ['reference'], 0, 1 );
-			$sOrderNo = substr ( $_REQUEST ['reference'], 11 );
+			$sOrderNo = ( int ) substr ( $_REQUEST ['reference'], 11 );
 			
 			// check if payment is still pending
 			$tableName = $wpdb->prefix . 'cardgate_payments';
@@ -505,10 +484,11 @@ class cardgate {
 			
 			// process order
 			$order = new WC_Order ( $sOrderNo );
+			method_exists ( $order, 'get_status' ) ? $sOrderStatus = $order->get_status () : $sOrderStatus = $order->status;
 			
 			$amount = $order->get_total () * 100;
 			
-			if (($order->get_status () != 'processing' && $order->get_status () != 'completed')) {
+			if (($sOrderStatus != 'processing' && $sOrderStatus != 'completed')) {
 				if ($_REQUEST ['code'] >= '200' && $_REQUEST ['code'] < '300') {
 					$order->payment_complete ();
 				}
@@ -703,49 +683,6 @@ class cardgate {
 		
 		return $methods;
 	}
-	function subscription_preaction() {
-		$custom_action = array (
-				'custom_action' => false,
-				'messages' => array (),
-				'error_messages' => array () 
-		);
-		
-		if (empty ( $_GET ['new_status'] )) {
-			return $custom_action;
-		}
-		
-		if ($_GET ['new_status'] != 'trash') {
-			return $custom_action;
-		}
-		
-		$subscriptions = array (
-				$_GET ['user'] => array (
-						$_GET ['subscription'] 
-				) 
-		);
-		
-		foreach ( $subscriptions as $user_id => $subscription_keys ) {
-			foreach ( $subscription_keys as $subscription_key ) {
-				$subscription_data = explode ( '_', $subscription_key );
-				$order_id = $subscription_data [0];
-				$order = new WC_Order ( $order_id );
-				
-				$gateways = new WC_Payment_Gateways ();
-				foreach ( $gateways->payment_gateways as $id => $gateway ) {
-					if (substr ( $gateway->id, 0, 8 ) == 'cardgate' && $gateway->enabled == 'yes') {
-						$supports = $gateway->supports;
-						foreach ( $supports as $support_id => $support_type ) {
-							if ($support_type == 'subscriptions') {
-								$gateway->trash_subscription ( $order );
-								return $custom_action;
-							}
-						}
-					}
-				}
-			}
-		}
-		return $custom_action;
-	}
 	function add_cgform_fields() {
 		global $woocommerce;
 		
@@ -758,7 +695,7 @@ class cardgate {
 			$gateways = $woocommerce->payment_gateways->payment_gateways ();
 			
 			foreach ( $gateways as $gateway ) {
-				if ((strtolower ( get_class ( $gateway ) ) == 'wc_' . $current_section)) {
+				if ((strtolower ( get_class ( $gateway ) ) == 'wc_' . $current_section)|| (strtolower ( get_class ( $gateway ) ) == $current_section)) {
 					$current_gateway = $gateway->id;
 					$extra_charges_id = 'woocommerce_' . $current_gateway . '_extra_charges';
 					$extra_charges_type = $extra_charges_id . '_type';
