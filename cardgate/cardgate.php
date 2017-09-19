@@ -5,7 +5,7 @@
  Plugin URI: http://cardgate.com
  Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  
- Version: 3.1.0
+ Version: 3.1.1
  Requires at least: 4.4
  
  Author: CardGate
@@ -66,6 +66,11 @@ class cardgate {
 				&$this,
 				'capture_payment_failed' 
 		) );
+		if (!$this->cardgate_settings())
+		add_action( 'admin_notices', array (
+				&$this,
+				'my_error_notice' ));
+		
 	}
 	
 	// ////////////////////////////////////////////////
@@ -818,6 +823,20 @@ class cardgate {
 			];
 		}
 		return $oMethods;
+	}
+	function my_error_notice() {
+		?>
+    <div class="error notice">
+        <p><b>CardGate: </b> <?php echo  __ ( '<b>Use the Settings button</b> in your <a href="https://my.cardgate.com/">merchant back-office</a> to set all these values, as explained in the <a href="https://www.cardgate.com/en/plug_in/woocommerce/?link=WooCommerce3x-1-manual" target="_blank">installation instructions</a> of this plugin.', 'cardgate' ); ?></p>
+    </div>
+    <?php
+	}
+	function cardgate_settings(){
+		if (!get_option ( 'cgp_siteid' ) || get_option ( 'cgp_siteid' )=='') return false;
+		if (!get_option ( 'cgp_hashkey' )|| get_option ( 'cgp_hashkey' )=='') return false;
+		if (!get_option ( 'cgp_merchant_id' )|| get_option ( 'cgp_merchant_id' )=='') return false;
+		if (!get_option ( 'cgp_merchant_api_key' ) || get_option ( 'cgp_merchant_api_key' )=='') return false;
+		return true;
 	}
 }
 
