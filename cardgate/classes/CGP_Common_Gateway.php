@@ -148,7 +148,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	 */
 	function process_payment($iOrderId) {
 		global $woocommerce;
-		
 		require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
 		
 		try {
