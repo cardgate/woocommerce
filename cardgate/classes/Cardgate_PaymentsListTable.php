@@ -5,7 +5,7 @@
  * Description: 
  * Copyright: Copyright (c) 2012
  * Company: Cardgate
- * @author Richard Schoots
+ * @author CardGate
  * @version 1.0
  */
 class Cardgate_PaymentsListTable extends WP_List_Table {

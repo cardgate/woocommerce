@@ -9,7 +9,7 @@ if (! defined ( 'ABSPATH' ))
  * Description: Gateway class
  * Copyright: Copyright (c) 2005 - 2017
  * Company: Cardgate
- * @author Richard Schoots
+ * @author CardGate
  * @version 1.0.0
  */
 class CGP_Common_Gateway extends WC_Payment_Gateway {
