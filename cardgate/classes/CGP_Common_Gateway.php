@@ -193,13 +193,28 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			
 			// Configure customer.
 			$oCustomer = $oTransaction->getCustomer ();
-			$oCustomer->setEmail ( $billing_email );
-			$oCustomer->address ()->setFirstName ( $billing_first_name );
-			$oCustomer->address ()->setLastName ( $billing_last_name );
-			$oCustomer->address ()->setAddress ( trim ( $billing_address_1 . ' ' . $billing_address_2 ) );
-			$oCustomer->address ()->setZipCode ( $billing_postcode );
-			$oCustomer->address ()->setCity ( $billing_city );
-			$oCustomer->address ()->setCountry ( $billing_country );
+			if ($billing_email != '') {
+				$oCustomer->setEmail ( $billing_email );
+			}
+			if ($billing_first_name != '') {
+				$oCustomer->address ()->setFirstName ( $billing_first_name );
+			}
+			if ($billing_last_name != '') {
+				$oCustomer->address ()->setLastName ( $billing_last_name );
+			}
+			$billing_address = trim ( $billing_address_1 . ' ' . $billing_address_2 );
+			if ($billing_address != '') {
+				$oCustomer->address ()->setAddress ( trim ( $billing_address_1 . ' ' . $billing_address_2 ) );
+			}
+			if ($billing_postcode != '') {
+				$oCustomer->address ()->setZipCode ( $billing_postcode );
+			}
+			if ($billing_city != '') {
+				$oCustomer->address ()->setCity ( $billing_city );
+			}
+			if ($billing_country != '') {
+				$oCustomer->address ()->setCountry ( $billing_country );
+			}
 		
 			$oCart = $oTransaction->getCart ();
 			$aCartItems = $this->getCartItems ( $iOrderId );
