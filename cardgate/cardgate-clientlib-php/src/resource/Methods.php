@@ -41,7 +41,7 @@ namespace cardgate\api\resource {
 		 * @api
 		 */
 		public function get( $sId_ ) {
-			return new \cardgate\api\Method( $this->_oClient, $sId_ );
+			return new \cardgate\api\Method( $this->_oClient, $sId_, $sId_ );
 		}
 
 		/**
@@ -68,7 +68,7 @@ namespace cardgate\api\resource {
 			$aMethods = [];
 			foreach( $aResult['options'] as $aOption ) {
 				if ( in_array( $aOption['id'], ( new \ReflectionClass( '\cardgate\api\Method' ) )->getConstants() ) ) {
-					$aMethods[] = new \cardgate\api\Method( $this->_oClient, $aOption['id'] );
+					$aMethods[] = new \cardgate\api\Method( $this->_oClient, $aOption['id'], $aOption['name'] );
 				}
 			}
 

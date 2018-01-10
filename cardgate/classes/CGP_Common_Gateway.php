@@ -175,7 +175,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$currency = get_woocommerce_currency ();
 			
 			$oTransaction = $oCardGate->transactions ()->create ( $iSiteId, $amount, $currency );
-		
+			
 			// Configure payment option.
 			$oTransaction->setPaymentMethod ( $this->payment_method );
 			if ($this->payment_method == 'idealpro') {
@@ -192,28 +192,28 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			method_exists ( $oOrder, 'get_billing_country' ) ? $billing_country = $oOrder->get_billing_country () : $billing_country = $oOrder->billing_country;
 			
 			// Configure customer.
-			$oCustomer = $oTransaction->getCustomer ();
+			$oConsumer = $oTransaction->getConsumer();
 			if ($billing_email != '') {
-				$oCustomer->setEmail ( $billing_email );
+				$oConsumer->setEmail ( $billing_email );
 			}
 			if ($billing_first_name != '') {
-				$oCustomer->address ()->setFirstName ( $billing_first_name );
+				$oConsumer->address ()->setFirstName ( $billing_first_name );
 			}
 			if ($billing_last_name != '') {
-				$oCustomer->address ()->setLastName ( $billing_last_name );
+				$oConsumer->address ()->setLastName ( $billing_last_name );
 			}
 			$billing_address = trim ( $billing_address_1 . ' ' . $billing_address_2 );
 			if ($billing_address != '') {
-				$oCustomer->address ()->setAddress ( trim ( $billing_address_1 . ' ' . $billing_address_2 ) );
+				$oConsumer->address ()->setAddress ( trim ( $billing_address_1 . ' ' . $billing_address_2 ) );
 			}
 			if ($billing_postcode != '') {
-				$oCustomer->address ()->setZipCode ( $billing_postcode );
+				$oConsumer->address ()->setZipCode ( $billing_postcode );
 			}
 			if ($billing_city != '') {
-				$oCustomer->address ()->setCity ( $billing_city );
+				$oConsumer->address ()->setCity ( $billing_city );
 			}
 			if ($billing_country != '') {
-				$oCustomer->address ()->setCountry ( $billing_country );
+				$oConsumer->address ()->setCountry ( $billing_country );
 			}
 		
 			$oCart = $oTransaction->getCart ();

@@ -30,14 +30,14 @@ namespace cardgate\api {
 	/**
 	 * Transaction instance.
 	 */
-	final class Transaction {
+	class Transaction {
 
 		/**
 		 * The client associated with this transaction.
 		 * @var Client
-		 * @access private
+		 * @access protected
 		 */
-		private $_oClient;
+		protected $_oClient;
 
 		/**
 		 * The transaction id.
@@ -47,102 +47,116 @@ namespace cardgate\api {
 		private $_sId;
 
 		/**
-		 * The transaction site id.
+		 * The site id to use for payments.
 		 * @var Integer
-		 * @access private
+		 * @access protected
 		 */
-		private $_iSiteId;
+		protected $_iSiteId;
+
+		/**
+		 * The site key to use for payments.
+		 * @var String
+		 * @access protected
+		 */
+		protected $_sSiteKey;
 
 		/**
 		 * The transaction amount in cents.
 		 * @var Integer
-		 * @access private
+		 * @access protected
 		 */
-		private $_iAmount;
+		protected $_iAmount;
 
 		/**
 		 * The transaction currency (ISO 4217).
 		 * @var String
-		 * @access private
+		 * @access protected
 		 */
-		private $_sCurrency;
+		protected $_sCurrency;
 
 		/**
 		 * The description for the transaction.
 		 * @var String
-		 * @access private
+		 * @access protected
 		 */
-		private $_sDescription;
+		protected $_sDescription;
 
 		/**
 		 * A reference for the transaction.
 		 * @var String
-		 * @access private
+		 * @access protected
 		 */
-		private $_sReference;
+		protected $_sReference;
 
 		/**
 		 * The payment method for the transaction.
 		 * @var Method
-		 * @access private
+		 * @access protected
 		 */
-		private $_oPaymentMethod = NULL;
+		protected $_oPaymentMethod = NULL;
 
 		/**
 		 * The payment method issuer for the transaction.
 		 * @var String
-		 * @access private
+		 * @access protected
 		 */
-		private $_sIssuer = NULL;
+		protected $_sIssuer = NULL;
 
 		/**
-		 * The customer for the transaction.
-		 * @var Customer
+		 * The recurring flag
+		 * @var Boolean
 		 * @access private
 		 */
-		private $_oCustomer = NULL;
+		private $_bRecurring = FALSE;
+
+		/**
+		 * The consumer for the transaction.
+		 * @var Consumer
+		 * @access protected
+		 */
+		protected $_oConsumer = NULL;
 
 		/**
 		 * The cart for the transaction.
 		 * @var Cart
-		 * @access private
+		 * @access protected
 		 */
-		private $_oCart = NULL;
+		protected $_oCart = NULL;
 
 		/**
 		 * The URL to send payment callback updates to.
 		 * @var String
-		 * @access private
+		 * @access protected
 		 */
-		private $_sCallbackUrl = NULL;
+		protected $_sCallbackUrl = NULL;
 
 		/**
 		 * The URL to redirect to on success.
 		 * @var String
-		 * @access private
+		 * @access protected
 		 */
-		private $_sSuccessUrl = NULL;
+		protected $_sSuccessUrl = NULL;
 
 		/**
 		 * The URL to redirect to on failre.
 		 * @var String
-		 * @access private
+		 * @access protected
 		 */
-		private $_sFailureUrl = NULL;
+		protected $_sFailureUrl = NULL;
 
 		/**
 		 * The URL to redirect to on pending.
 		 * @var String
-		 * @access private
+		 * @access protected
 		 */
-		private $_sPendingUrl = NULL;
+		protected $_sPendingUrl = NULL;
 
 		/**
 		 * The URL to redirect to after initial transaction register.
 		 * @var String
-		 * @access private
+		 * @access protected
 		 */
-		private $_sActionUrl = NULL;
+		protected $_sActionUrl = NULL;
 
 		/**
 		 * The constructor.
@@ -216,6 +230,32 @@ namespace cardgate\api {
 		 */
 		public function getSiteId() {
 			return $this->_iSiteId;
+		}
+
+		/**
+		 * Set the Site key to authenticate the hash in the request.
+		 * @param String $sSiteKey_ The site key to set.
+		 * @return Client
+		 * @throws Exception
+		 * @access public
+		 * @api
+		 */
+		public function setSiteKey( $sSiteKey_ ) {
+			if ( ! is_string( $sSiteKey_ ) ) {
+				throw new Exception( 'Client.SiteKey.Invalid', 'invalid site key: ' . $sSiteKey_ );
+			}
+			$this->_sSiteKey = $sSiteKey_;
+			return $this;
+		}
+
+		/**
+		 * Get the Merchant API key to authenticate the transaction request with.
+		 * @return String The merchant API key.
+		 * @access public
+		 * @api
+		 */
+		public function getSiteKey() {
+			return $this->_sSiteKey;
 		}
 
 		/**
@@ -335,7 +375,7 @@ namespace cardgate\api {
 			if ( $mPaymentMethod_ instanceof Method ) {
 				$this->_oPaymentMethod = $mPaymentMethod_;
 			} elseif ( is_string( $mPaymentMethod_ ) ) {
-				$this->_oPaymentMethod = new Method( $this->_oClient, $mPaymentMethod_ );
+				$this->_oPaymentMethod = new Method( $this->_oClient, $mPaymentMethod_, $mPaymentMethod_ );
 			} else {
 				throw new Exception( 'Transaction.PaymentMethod.Invalid', 'invalid payment method: ' . $mPaymentMethod_ );
 			}
@@ -382,29 +422,52 @@ namespace cardgate\api {
 		}
 
 		/**
-		 * Set the customer for the transaction.
-		 * @param Customer $oCustomer_ The customer for the transaction.
+		 * Set the recurring flag on the transaction.
+		 * @param Boolean $bRecurring_ Wether or not this transaction can be used for recurring.
 		 * @return Transaction
 		 * @throws Exception
 		 * @access public
 		 * @api
 		 */
-		public function setCustomer( Customer $oCustomer_ ) {
-			$this->_oCustomer = $oCustomer_;
+		public function setRecurring( $bRecurring_ ) {
+			$this->_bRecurring = $bRecurring_;
 			return $this;
 		}
 
 		/**
-		 * Get the customer for the transaction.
-		 * @return Customer The customer for the transaction.
+		 * Get the recurring flag of the transaction.
+		 * @return Boolean Returns wether or not this transaction can be used for recurring.
 		 * @access public
 		 * @api
 		 */
-		public function getCustomer() {
-			if ( empty( $this->_oCustomer ) ) {
-				$this->_oCustomer = new Customer();
+		public function getRecurring() {
+			return $this->_bRecurring;
+		}
+
+		/**
+		 * Set the consumer for the transaction.
+		 * @param Consumer $oConsumer_ The consumer for the transaction.
+		 * @return Transaction
+		 * @throws Exception
+		 * @access public
+		 * @api
+		 */
+		public function setConsumer( Consumer $oConsumer_ ) {
+			$this->_oConsumer = $oConsumer_;
+			return $this;
+		}
+
+		/**
+		 * Get the consumer for the transaction.
+		 * @return Consumer The consumer for the transaction.
+		 * @access public
+		 * @api
+		 */
+		public function getConsumer() {
+			if ( empty( $this->_oConsumer ) ) {
+				$this->_oConsumer = new Consumer();
 			}
-			return $this->_oCustomer;
+			return $this->_oConsumer;
 		}
 
 		/**
@@ -569,7 +632,7 @@ namespace cardgate\api {
 		 */
 		public function register() {
 			$aData = [
-				'site'			=> $this->_iSiteId,
+				'site_id' 		=> $this->_iSiteId,
 				'amount'		=> $this->_iAmount,
 				'currency_id'	=> $this->_sCurrency,
 				'url_callback'	=> $this->_sCallbackUrl,
@@ -577,13 +640,17 @@ namespace cardgate\api {
 				'url_failure'	=> $this->_sFailureUrl,
 				'url_pending'	=> $this->_sPendingUrl,
 				'description'	=> $this->_sDescription,
-				'reference'		=> $this->_sReference
+				'reference'		=> $this->_sReference,
+				'recurring'		=> $this->_bRecurring ? '1' : '0'
 			];
-			if ( ! is_null( $this->_oCustomer ) ) {
-				$aData['email'] = $this->_oCustomer->getEmail();
-				$aData['phone'] = $this->_oCustomer->getPhone();
-				$aData = array_merge( $aData, $this->_oCustomer->address()->getData() );
-				$aData = array_merge( $aData, $this->_oCustomer->shippingAddress()->getData( 'shipto_' ) );
+			if ( ! is_null( $this->_oConsumer ) ) {
+				$aData['email'] = $this->_oConsumer->getEmail();
+				$aData['phone'] = $this->_oConsumer->getPhone();
+				$aData['consumer'] = array_merge(
+					$this->_oConsumer->address()->getData(),
+					$this->_oConsumer->shippingAddress()->getData( 'shipto_' )
+				);
+				$aData['country_id'] = $this->_oConsumer->address()->getCountry();
 			}
 			if ( ! is_null( $this->_oCart ) ) {
 				$aData['cartitems'] = $this->_oCart->getData();
@@ -640,12 +707,12 @@ namespace cardgate\api {
 		/**
 		 * This method can be used to (partially) refund a transaction.
 		 * @param Integer $iAmount_
-		 * @return Transaction
+		 * @return Transaction The new (refund) transaction.
 		 * @throws Exception
 		 * @access public
 		 * @api
 		 */
-		public function refund( $iAmount_ = NULL ) {
+		public function refund( $iAmount_ = NULL, $sDescription_ = NULL ) {
 			if (
 				! is_null( $iAmount_ )
 				&& ! is_integer( $iAmount_ )
@@ -654,9 +721,9 @@ namespace cardgate\api {
 			}
 
 			$aData = [
-				'site'			=> $this->_iSiteId,
 				'amount'		=> is_null( $iAmount_ ) ? $this->_iAmount : $iAmount_,
-				'currency_id'	=> $this->_sCurrency
+				'currency_id'	=> $this->_sCurrency,
+				'description'	=> $sDescription_
 			];
 
 			$sResource = "refund/{$this->_sId}/";
@@ -671,7 +738,42 @@ namespace cardgate\api {
 				throw new Exception( 'Transaction.Request.Invalid', 'invalid payment data returned' );
 			}
 
-			return $this;
+			return $this->_oClient->transactions()->get( $aResult['refund']['transaction'] );
+		}
+
+		/**
+		 * This method can be used to recur a transaction.
+		 * @param Integer $iAmount_
+		 * @return Transaction The new (recurred) transaction.
+		 * @throws Exception
+		 * @access public
+		 * @api
+		 */
+		public function recur( $iAmount_, $sReference_ = NULL, $sDescription_ = NULL ) {
+			if ( ! is_integer( $iAmount_ ) ) {
+				throw new Exception( 'Transaction.Amount.Invalid', 'invalid amount: ' . $iAmount_ );
+			}
+
+			$aData = [
+				'amount'		=> $iAmount_,
+				'currency_id'	=> $this->_sCurrency,
+				'reference'		=> $sReference_,
+				'description'	=> $sDescription_
+			];
+
+			$sResource = "recurring/{$this->_sId}/";
+
+			$aData = array_filter( $aData ); // remove NULL values
+			$aResult = $this->_oClient->doRequest( $sResource, $aData, 'POST' );
+
+			if (
+				empty( $aResult['recurring'] )
+				|| empty( $aResult['recurring']['transaction_id'] )
+			) {
+				throw new Exception( 'Transaction.Request.Invalid', 'invalid payment data returned' );
+			}
+
+			return $this->_oClient->transactions()->get( $aResult['recurring']['transaction_id'] );
 		}
 
 	}

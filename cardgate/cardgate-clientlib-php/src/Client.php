@@ -35,7 +35,7 @@ namespace cardgate\api {
 		/**
 		 * Client version.
 		 */
-		const CLIENT_VERSION = "0.0.1";
+		const CLIENT_VERSION = "1.1.4";
 
 		/**
 		 * Url to use for production.
@@ -97,11 +97,18 @@ namespace cardgate\api {
 		private $_oTransactions = NULL;
 
 		/**
-		 * The customers resource.
-		 * @var resource\Customers
+		 * The subscriptions resource.
+		 * @var resource\Subscriptions
 		 * @access private
 		 */
-		private $_oCustomers = NULL;
+		private $_oSubscriptions = NULL;
+
+		/**
+		 * The consumers resource.
+		 * @var resource\Consumers
+		 * @access private
+		 */
+		private $_oConsumers = NULL;
 
 		/**
 		 * The issuers resource.
@@ -271,7 +278,11 @@ namespace cardgate\api {
 		 * @api
 		 */
 		public function getUrl() {
-			return ( $this->getTestmode() ? self::URL_STAGING : self::URL_PRODUCTION );
+			if ( ! empty( $_SERVER['CG_API_URL'] ) ) {
+				return $_SERVER['CG_API_URL'];
+			} else {
+				return ( $this->getTestmode() ? self::URL_STAGING : self::URL_PRODUCTION );
+			}
 		}
 
 		/**
@@ -349,16 +360,29 @@ namespace cardgate\api {
 		}
 
 		/**
-		 * Accessor for the customers resource.
-		 * @return resource\Customers
+		 * Accessor for the subscriptions resource.
+		 * @return resource\Subscriptions
 		 * @access public
 		 * @api
 		 */
-		public function customers() {
-			if ( NULL == $this->_oCustomers ) {
-				$this->_oCustomers = new resource\Customers( $this );
+		public function subscriptions() {
+			if ( NULL == $this->_oSubscriptions ) {
+				$this->_oSubscriptions = new resource\Subscriptions( $this );
 			}
-			return $this->_oCustomers;
+			return $this->_oSubscriptions;
+		}
+
+		/**
+		 * Accessor for the consumers resource.
+		 * @return resource\Consumers
+		 * @access public
+		 * @api
+		 */
+		public function consumers() {
+			if ( NULL == $this->_oConsumers ) {
+				$this->_oConsumers = new resource\Consumers( $this );
+			}
+			return $this->_oConsumers;
 		}
 
 		/**

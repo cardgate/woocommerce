@@ -58,17 +58,51 @@ namespace cardgate\api\resource {
 				$aDetails_ = array_merge( $aDetails_, $aResult['transaction'] );
 			}
 
-			$oTransaction = new \cardgate\api\Transaction( $this->_oClient, (int)$aResult['transaction']['site_id'], (int)$aResult['transaction']['amount'], $aResult['transaction']['currency_id'] );
-			$oTransaction
-				->setId( $aResult['transaction']['id'] )
-				->setDescription( $aResult['transaction']['description'] )
-				->setReference( $aResult['transaction']['reference'] )
-				->setPaymentMethod( $aResult['transaction']['option'] )
-			;
-
-			// TODO set consumer?
+			$oTransaction = new \cardgate\api\Transaction(
+				$this->_oClient,
+				(int)$aResult['transaction']['site_id'],
+				(int)$aResult['transaction']['amount'],
+				$aResult['transaction']['currency_id']
+			);
+			$oTransaction->setId( $aResult['transaction']['id'] );
+			if ( ! empty( $aResult['transaction']['description'] ) ) {
+				$oTransaction->setDescription( $aResult['transaction']['description'] );
+			}
+			if ( ! empty( $aResult['transaction']['reference'] ) ) {
+				$oTransaction->setReference( $aResult['transaction']['reference'] );
+			}
+			if ( ! empty( $aResult['transaction']['option'] ) ) {
+				$oTransaction->setPaymentMethod( $aResult['transaction']['option'] );
+			}
 
 			return $oTransaction;
+		}
+
+		/**
+		 * This method can be used to retrieve a transaction status.
+		 * @param String $sTransactionId_ The transaction identifier.
+		 * @return string
+		 * @throws Exception
+		 * @access public
+		 * @api
+		 */
+		public function status( $sTransactionId_ ) {
+			if ( ! is_string( $sTransactionId_ ) ) {
+				throw new \cardgate\api\Exception( 'Transaction.Id.Invalid', 'invalid transaction id: ' . $sTransactionId_ );
+			}
+
+			$sResource = "status/{$sTransactionId_}/";
+
+			$aResult = $this->_oClient->doRequest( $sResource, NULL, 'GET' );
+
+			if (
+				empty( $aResult['status'] )
+				|| ! is_string( $aResult['status'] )
+			) {
+				throw new \cardgate\api\Exception( 'Transaction.Status.Invalid', 'invalid transaction status returned' );
+			}
+
+			return $aResult['status'];
 		}
 
 		/**
