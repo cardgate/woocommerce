@@ -60,6 +60,9 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 
 == Changelog ==
 
+= 3.1.3 =
+* Updated CLientLib Library
+
 = 3.1.2 =
 * Address data no longer mandatory
 
