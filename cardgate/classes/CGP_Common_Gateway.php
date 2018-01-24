@@ -159,6 +159,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$bIsTest = (get_option ( 'cgp_mode' ) == 1 ? true : false);
 			$sLanguage = substr ( get_locale (), 0, 2 );
 			$oOrder = new WC_Order ( $iOrderId );
+	
 			$sVersion = ($this->get_woocommerce_version () == '' ? 'unkown' : $this->get_woocommerce_version ());
 			
 			$oCardGate = new cardgate\api\Client ( ( int ) $iMerchantId, $sMerchantApiKey, $bIsTest );
@@ -188,6 +189,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			method_exists ( $oOrder, 'get_billing_address_1' ) ? $billing_address_1 = $oOrder->get_billing_address_1 () : $billing_address_1 = $oOrder->billing_address_1;
 			method_exists ( $oOrder, 'get_billing_address_2' ) ? $billing_address_2 = $oOrder->get_billing_address_2 () : $billing_address_2 = $oOrder->billing_address_2;
 			method_exists ( $oOrder, 'get_billing_postcode' ) ? $billing_postcode = $oOrder->get_billing_postcode () : $billing_postcode = $oOrder->billing_postcode;
+			method_exists ( $oOrder, 'get_billing_state' ) ? $billing_state = $oOrder->get_billing_state () : $billing_state = $oOrder->billing_state;
 			method_exists ( $oOrder, 'get_billing_city' ) ? $billing_city = $oOrder->get_billing_city () : $billing_city = $oOrder->billing_city;
 			method_exists ( $oOrder, 'get_billing_country' ) ? $billing_country = $oOrder->get_billing_country () : $billing_country = $oOrder->billing_country;
 			
@@ -212,9 +214,47 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			if ($billing_city != '') {
 				$oConsumer->address ()->setCity ( $billing_city );
 			}
+			if ($billing_state != '') {
+				$oConsumer->address ()->setState ( $billing_state );
+			}
 			if ($billing_country != '') {
 				$oConsumer->address ()->setCountry ( $billing_country );
 			}
+			
+			method_exists ( $oOrder, 'get_shipping_first_name' ) ? $shipping_first_name = $oOrder->get_shipping_first_name () : $shipping_first_name = $oOrder->shipping_first_name;
+			method_exists ( $oOrder, 'get_shipping_last_name' ) ? $shipping_last_name = $oOrder->get_shipping_last_name () : $shipping_last_name = $oOrder->shipping_last_name;
+			method_exists ( $oOrder, 'get_shipping_last_name' ) ? $shipping_last_name = $oOrder->get_shipping_last_name () : $shipping_last_name = $oOrder->shipping_last_name;
+			method_exists ( $oOrder, 'get_shipping_address_1' ) ? $shipping_address_1 = $oOrder->get_shipping_address_1 () : $shipping_address_1 = $oOrder->shipping_address_1;
+			method_exists ( $oOrder, 'get_shipping_address_2' ) ? $shipping_address_2 = $oOrder->get_shipping_address_2 () : $shipping_address_2 = $oOrder->shipping_address_2;
+			method_exists ( $oOrder, 'get_shipping_postcode' ) ? $shipping_postcode = $oOrder->get_shipping_postcode () : $shipping_postcode = $oOrder->shipping_postcode;
+			method_exists ( $oOrder, 'get_shipping_state' ) ? $shipping_state = $oOrder->get_shipping_state () : $shipping_state = $oOrder->shipping_state;
+			method_exists ( $oOrder, 'get_shipping_city' ) ? $shipping_city = $oOrder->get_shipping_city () : $shipping_city = $oOrder->shipping_city;
+			method_exists ( $oOrder, 'get_shipping_country' ) ? $shipping_country = $oOrder->get_shipping_country () : $shipping_country = $oOrder->shipping_country;
+			
+			if ($shipping_first_name != '') {
+				$oConsumer->shippingAddress ()->setFirstName ( $shipping_first_name );
+			}
+			if ($shipping_last_name != '') {
+				$oConsumer->shippingAddress ()->setLastName ( $shipping_last_name );
+			}
+			$shipping_address = trim ( $shipping_address_1 . ' ' . $shipping_address_2 );
+			if ($shipping_address != '') {
+				$oConsumer->shippingAddress ()->setAddress ( trim ( $shipping_address_1 . ' ' . $shipping_address_2 ) );
+			}
+			if ($shipping_postcode != '') {
+				$oConsumer->shippingAddress ()->setZipCode ( $shipping_postcode );
+			}
+			if ($shipping_city != '') {
+				$oConsumer->shippingAddress ()->setCity ( $shipping_city );
+			}
+			if ($shipping_state != '') {
+				$oConsumer->shippingAddress ()->setState ( $shipping_state );
+			}
+			if ($shipping_country != '') {
+				$oConsumer->shippingAddress ()->setCountry ( $shipping_country );
+			}
+					
+			
 		
 			$oCart = $oTransaction->getCart ();
 			$aCartItems = $this->getCartItems ( $iOrderId );
@@ -233,6 +273,12 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 						break;
 					case 'discount' :
 						$iItemType = \cardgate\api\Item::TYPE_DISCOUNT;
+						break;
+					case 'correction' :
+						$iItemType = \cardgate\api\Item::TYPE_CORRECTION;
+						break;
+					case 'vatcorrection' :
+						$iItemType = \cardgate\api\Item::TYPE_VAT_CORRECTION;
 						break;
 				}
 				
@@ -390,24 +436,26 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		
 		// any discount will be already calculated in the item total
 		$aOrder_items = $oOrder->get_items ();
+		
 		foreach ( $aOrder_items as $oItem ) {
 			if (is_object ( $oItem )) {
 				$oProduct = $oItem->get_product ();
 				$sName = $oProduct->get_name ();
 				$sModel = $this->formatSku ( $oProduct );
 				$iQty = $oItem->get_quantity ();
-				$iPrice = round ( ($oItem->get_total () * 100) / $iQty );
-				$iTax = round ( ($oItem->get_total_tax () * 100) / $iQty );
+				$iPrice = round ( ($oItem->get_total () * 100) / $iQty);
+				$iTax = round ( ($oItem->get_total_tax () * 100) / $iQty);
 				$iTotal = round ( $iPrice + $iTax );
 				$iTaxrate = ($iTax > 0 ? round ( ($iTotal / $iPrice - 1) * 100, 2 ) : 0);
 			} else {
+				
 				$aItem = $oItem;
 				$sName = $aItem ['name'];
 				$sModel = 'product_' . $aItem ['item_meta'] ['_product_id'] [0];
 				$oProduct = $oOrder->get_product_from_item ( $aItem );
 				$iQty = ( int ) $aItem ['item_meta'] ['_qty'] [0];
-				$iPrice = round ( ($oOrder->get_item_total ( $aItem, false, false ) * 100) / $iQty );
-				$iTax = round ( ($oOrder->get_item_tax ( $aItem, false ) * 100) / $iQty );
+				$iPrice = round ( ($oOrder->get_item_total ( $aItem, false, false ) * 100));
+				$iTax = round ( ($oOrder->get_item_tax ( $aItem, false ) * 100));
 				$iTotal = round ( $iPrice + $iTax );
 				$iTaxrate = ($iTax > 0 ? round ( ($iTotal / $iPrice - 1) * 100, 2 ) : 0);
 			}
@@ -477,12 +525,25 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$items [$nr] ['vat_amount'] = 0;
 		}
 		
-		$iCorrection = round ( $iOrderTotal - $iCartItemTotal - $iCartItemTaxTotal - $iShippingTotal - $iShippingVatTotal - $iExtraFee );
+		$iTaxDifference = round($oOrder->get_total_tax()*100)-$iCartItemTaxTotal - $iShippingVatTotal;
+		if ($iTaxDifference != 0) {
+			$nr ++;
+			$items [$nr] ['type'] = 'vatcorrection';
+			$items [$nr] ['model'] = 'Correction';
+			$items [$nr] ['name'] = 'vat_correction';
+			$items [$nr] ['quantity'] = 1;
+			$items [$nr] ['price_wt'] = $iTaxDifference;
+			$items [$nr] ['vat'] = 0;
+			$items [$nr] ['vat_amount'] = 0;
+		}
+			
 		
+		$iCorrection = round ( $iOrderTotal - $iCartItemTotal - $iCartItemTaxTotal - $iShippingTotal - $iShippingVatTotal - $iExtraFee - $iTaxDifference);
+
 		if ($iCorrection != 0) {
 			
 			$nr ++;
-			$items [$nr] ['type'] = 'product';
+			$items [$nr] ['type'] = 'correction';
 			$items [$nr] ['model'] = 'Correction';
 			$items [$nr] ['name'] = 'item_correction';
 			$items [$nr] ['quantity'] = 1;
