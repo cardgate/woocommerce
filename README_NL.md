@@ -47,7 +47,7 @@ RESTful API gebruikersnaam en wachtwoord op, of neem contact op met je accountma
 
 5. Voor de instellingen van de plug-in:  
    Ga naar [Mijn CardGate](https://my.cardgate.com/).  
-   (**Let Wel:** Voor **TestMode** kiest u na het inloggen bij Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging**.)  
+   **Let Wel:** Voor **TestMode** kiest u na het inloggen bij Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging**.  
    Ga naar **Beheer, Sites** en klik op de **ID** van de site die je wilt instellen.  
    Kies bij **Technische Koppeling** de knop **Uw Webshop Instellen**, kies uw plug-in type en verstuur de data naar uw site.  
 
@@ -64,7 +64,7 @@ alsook de **WooCommerce plug-in 2.1.x of hoger**.
 
 4. Voor de instellingen van de plug-in:  
    Ga naar [Mijn CardGate](https://my.cardgate.com/).  
-   (**Let Wel:** Voor **TestMode** kiest u na het inloggen bij Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging**.)  
+   **Let Wel:** Voor **TestMode** kiest u na het inloggen bij Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging**.  
    Ga naar **Beheer, Sites** en klik op de **ID** van de site die je wilt instellen.  
    Kies bij **Technische Koppeling** de knop **Uw Webshop Instellen**, kies uw plug-in type en verstuur de data naar uw site.  
 
