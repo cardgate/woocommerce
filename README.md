@@ -28,7 +28,7 @@ Please visit [My Cardgate](https://my.cardgate.com/) and retrieve your RESTful A
    you must also fill in the **Merchant ID** and the **Merchant API key** in your CardGate plugin settings.
 
 5. For the settings of the plug-in:  
-   Go to [My Cardgate](https://my.cardgate.com/)  
+   Go to [My Cardgate](https://my.cardgate.com/).  
    **N.B.** For the **Testmode settings** click your **user avatar** on the **top right** and choose **To Staging**.  
    Go to **Management, Sites** and click on the ID of the site you wish to set.  
    Under **Connection to the website**, click on the **Setup your webshop** button, choose your plug-in type, and send the data to your website
@@ -40,15 +40,15 @@ Please visit [My Cardgate](https://my.cardgate.com/) and retrieve your RESTful A
 
 2. Go to your **WordPress admin**, select **plug-ins**, and then **Add plug-in**.
 
-3. Fill **cardgate** into the **search field.**
+3. Fill **cardgate** into the **search field**.
 
-4. Click on **Install now** and then **Activate**
+4. Click on **Install now** and then **Activate**.
 
 5. For the settings of the plug-in:  
-   Go to [My Cardgate](https://my.cardgate.com/)  
+   Go to [My Cardgate](https://my.cardgate.com/).  
    **N.B.** For the **Testmode settings** click your **user avatar** on the **top right** and choose **To Staging**.  
    Go to **Management, Sites** and click on the ID of the site you wish to set.  
-   Under **Connection to the website**, click on the **Setup your webshop** button, choose your plug-in type, and send the data to your website
+   Under **Connection to the website**, click on the **Setup your webshop** button, choose your plug-in type, and send the data to your website.
 
 ## Configuration
 
@@ -73,7 +73,7 @@ and **WooCommerce plug-in 3.x or higher**.
 6. The settings should now be visible here, and can be changed manually if you wish to do so.
 
 7. In the **admin** select **WooCommerce, Settings, Checkout**.
-   Here you see the CardGate payment methods.
+   Here you see the CardGate payment methods.  
    **Attention**: The CardGate payment methods are only visible in WooCommerce,  
    if the Site ID and Hash Key were entered correctly.
 

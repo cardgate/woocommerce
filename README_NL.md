@@ -30,8 +30,8 @@ RESTful API gebruikersnaam en wachtwoord op, of neem contact op met je accountma
    
 5. Voor de instellingen van de plug-in:  
    Ga naar [Mijn CardGate](https://my.cardgate.com/).  
-   **Let Wel:** Voor **TestMode** Kiest u na het inloggen van Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging.**  
-   Ga naar **Beheer, Sites** en klik op de **ID** van de site die je wilt instellen.   
+   **Let Wel:** Voor **TestMode** kiest u na het inloggen van Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging**.  
+   Ga naar **Beheer, Sites** en klik op de **ID** van de site die je wilt instellen.  
    Kies bij **Technische Koppeling** de knop **Uw Webshop Instellen**, kies uw plug-in type en verstuur de data naar uw site.  
 
 ## Eerste installatie
@@ -46,8 +46,8 @@ RESTful API gebruikersnaam en wachtwoord op, of neem contact op met je accountma
 4. Klik op de knop **Nu installeren**, en daarna op **Activeren**.
 
 5. Voor de instellingen van de plug-in:  
-   Ga naar [Mijn CardGate](https://my.cardgate.com/)  
-   (**Let Wel:** Voor **TestMode** kiest u na het inloggen bij Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging.**)  
+   Ga naar [Mijn CardGate](https://my.cardgate.com/).  
+   (**Let Wel:** Voor **TestMode** kiest u na het inloggen bij Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging**.)  
    Ga naar **Beheer, Sites** en klik op de **ID** van de site die je wilt instellen.  
    Kies bij **Technische Koppeling** de knop **Uw Webshop Instellen**, kies uw plug-in type en verstuur de data naar uw site.  
 
@@ -60,19 +60,19 @@ alsook de **WooCommerce plug-in 2.1.x of hoger**.
 
 2. Vul **cardgate** in bij het veld **Plugins zoeken...**
 
-3. Klik op de knop **Nu installeren**, en daarna op **Activeren** 
+3. Klik op de knop **Nu installeren**, en daarna op **Activeren**. 
 
 4. Voor de instellingen van de plug-in:  
    Ga naar [Mijn CardGate](https://my.cardgate.com/).  
    (**Let Wel:** Voor **TestMode** kiest u na het inloggen bij Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging**.)  
-   Ga naar **Beheer, Sites** en klik op de **ID** van de site die je wilt instellen  
+   Ga naar **Beheer, Sites** en klik op de **ID** van de site die je wilt instellen.  
    Kies bij **Technische Koppeling** de knop **Uw Webshop Instellen**, kies uw plug-in type en verstuur de data naar uw site.  
 
 5. Aan de linkerkant van je WordPress admin, selecteer **CardGate, Instellingen**.
 
 6. De instellingen zouden hier nu correct ingevuld moeten zijn, en kunnen indien gewenst ook handmatig ingevuld worden.
 
-7. In de **admin** selecteer **WooCommerce, Instellingen, Afrekenen.  
+7. In de **admin** selecteer **WooCommerce, Instellingen, Afrekenen**.  
    Hier zie je de CardGate betaalmethoden.  
    **Let op:** De CardGate betaalmethoden zijn alleen zichtbaar in WooCommerce,  
    indien zowel de Site ID als de Hash Key (Codeersleutel) correct zijn ingevuld.  
