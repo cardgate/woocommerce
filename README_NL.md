@@ -29,11 +29,10 @@ RESTful API gebruikersnaam en wachtwoord op, of neem contact op met je accountma
    moet je ook de **Merchant ID** en de **Merchant API key** invullen bij je Cardgate plug-in.
    
 5. Voor de instellingen van de plug-in:  
-   Ga naar [Mijn CardGate](https://my.cardgate.com/)  
+   Ga naar [Mijn CardGate](https://my.cardgate.com/).  
    **Let Wel:** Voor **TestMode** Kiest u na het inloggen van Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging.**  
-   Ga naar **Beheer, Sites** en klik op de **ID** van de site die je wilt instellen  
+   Ga naar **Beheer, Sites** en klik op de **ID** van de site die je wilt instellen.   
    Kies bij **Technische Koppeling** de knop **Uw Webshop Instellen**, kies uw plug-in type en verstuur de data naar uw site.  
- to your website
 
 ## Eerste installatie
 
@@ -44,11 +43,11 @@ RESTful API gebruikersnaam en wachtwoord op, of neem contact op met je accountma
 
 3. Vul **cardgate** in bij het veld **Plugins zoeken...**
 
-4. Klik op de knop **Nu installeren**, en daarna op **Activeren**
+4. Klik op de knop **Nu installeren**, en daarna op **Activeren**.
 
 5. Voor de instellingen van de plug-in:  
    Ga naar [Mijn CardGate](https://my.cardgate.com/)  
-   (**Let Wel:** Voor **TestMode** kiest u na het inloggen bij Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging.**)
+   (**Let Wel:** Voor **TestMode** kiest u na het inloggen bij Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging.**)  
    Ga naar **Beheer, Sites** en klik op de **ID** van de site die je wilt instellen.  
    Kies bij **Technische Koppeling** de knop **Uw Webshop Instellen**, kies uw plug-in type en verstuur de data naar uw site.  
 
@@ -64,7 +63,7 @@ alsook de **WooCommerce plug-in 2.1.x of hoger**.
 3. Klik op de knop **Nu installeren**, en daarna op **Activeren** 
 
 4. Voor de instellingen van de plug-in:  
-   Ga naar [Mijn CardGate](https://my.cardgate.com/)  
+   Ga naar [Mijn CardGate](https://my.cardgate.com/).  
    (**Let Wel:** Voor **TestMode** kiest u na het inloggen bij Mijn CardGate, uw gebruikers avatar **Rechts boven** en kies je **Naar Staging**.)  
    Ga naar **Beheer, Sites** en klik op de **ID** van de site die je wilt instellen  
    Kies bij **Technische Koppeling** de knop **Uw Webshop Instellen**, kies uw plug-in type en verstuur de data naar uw site.  
