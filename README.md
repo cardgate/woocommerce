@@ -12,7 +12,7 @@ This plugin supports WooCommerce version **3.X**.
 
 ## Preparation
 
-The usage of this module requires that you have obtained CardGate RESTful API credentials.
+The usage of this module requires that you have obtained CardGate RESTful API credentials.  
 Please visit [My Cardgate](https://my.cardgate.com/) and retrieve your RESTful API username and password, or contact your accountmanager.
 
 ## Installation
@@ -31,7 +31,7 @@ Please visit [My Cardgate](https://my.cardgate.com/) and retrieve your RESTful A
    Go to [My Cardgate](https://my.cardgate.com/).  
    **N.B.** For the **Testmode settings** click your **user avatar** on the **top right** and choose **To Staging**.  
    Go to **Management, Sites** and click on the ID of the site you wish to set.  
-   Under **Connection to the website**, click on the **Setup your webshop** button, choose your plug-in type, and send the data to your website
+   Under **Connection to the website**, click on the **Setup your webshop** button, choose your plug-in type, and send the data to your website.
 
 ## First Installation
 
@@ -63,10 +63,10 @@ and **WooCommerce plug-in 3.x or higher**.
 
 4. For the settings of the plug-in:
    Go to [My Cardgate](https://my.cardgate.com/) 
-   **N.B.** For the **Testmode settings** click your **user avatar** on the **top right** and choose **To Staging**.
-   Go to **Management, Sites** and click on the **ID** of the site you wish to set.
+   **N.B.** For the **Testmode settings** click your **user avatar** on the **top right** and choose **To Staging**.  
+   Go to **Management, Sites** and click on the **ID** of the site you wish to set.  
    Under **Connection to the website**, click on the **Setup your webshop** button,  
-   choose your plug-in type, and send the data to your website
+   choose your plug-in type, and send the data to your website.
 
 5. On the left side of your WordPress admin, select **CardGate, Settings**.
 
