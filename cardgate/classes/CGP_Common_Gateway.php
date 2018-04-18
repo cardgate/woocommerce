@@ -43,7 +43,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             <p class="form-row form-row-first ">
                 <label for="cc-expire-month">' . __ ( 'Bank Option', 'cardgate' ) . '<span class="required">*</span></label>';
 		$html .= '<select name="cgp_bank_options" id="cgp_bank_options" class="woocommerce-select">';
-		$html .= '<option value="0">Kies uw bank</option>';
+		$html .='<option value="0">Kies uw bank</option>';
 		foreach ( $aIssuers as $id => $name ) {
 			$html .= '<option value="' . $id;
 			if (isset ( $this->bankOption ) && $id == $this->bankOption) {
