@@ -40,7 +40,7 @@ namespace cardgate\api {
 		/**
 		 * Url to use for production.
 		 */
-		const URL_PRODUCTION = 'https://secure.curopayments.net/rest/v1/curo/';
+		const URL_PRODUCTION = 'https://secure-beta.curopayments.net/rest/v1/curo/';
 
 		/**
 		 * Url to use for testing.
@@ -424,7 +424,6 @@ namespace cardgate\api {
 			if ( ! in_array( $sHttpMethod_, [ 'GET', 'POST' ] ) ) {
 				throw new Exception( 'Client.HttpMethod.Invalid', 'invalid http method: ' . $sHttpMethod_ );
 			}
-
 			$sUrl = $this->getUrl() . $sResource_;
 			if ( is_array( $aData_ ) ) {
 				$aData_['ip'] = $this->getIp();
