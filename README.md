@@ -9,7 +9,7 @@ This plugin supports WooCommerce version **3.X**.
 ## Preparation
 
 The usage of this module requires that you have obtained CardGate RESTful API credentials.  
-Please visit [My Cardgate](https://my.cardgate.com/) and retrieve your RESTful API username and password, or contact your accountmanager.
+Please visit [My CardGate](https://my.cardgate.com/) and retrieve your credentials, or contact your accountmanager.
 
 ## Installation
 
@@ -21,10 +21,10 @@ Please visit [My Cardgate](https://my.cardgate.com/) and retrieve your RESTful A
 
 4. The previous settings will be left unchanged.
    **Note:** When you update from **Woocommerce 2.x** to **Woocommerce 3.x**,  
-   you must also fill in the **Merchant ID** and the **Merchant API key** in your CardGate plugin settings.
+   you must also fill in the **Merchant ID** and the **API key** in your CardGate plugin settings.
 
 5. For the settings of the plug-in:  
-   Go to [My Cardgate](https://my.cardgate.com/).  
+   Go to [My CardGate](https://my.cardgate.com/).  
    **N.B.** For the **Testmode settings** click your **user avatar** on the **top right** and choose **To Staging**.  
    Go to **Management, Sites** and click on the ID of the site you wish to set.  
    Under **Connection to the website**, click on the **Setup your webshop** button, choose your plug-in type, and send the data to your website.
@@ -41,7 +41,7 @@ Please visit [My Cardgate](https://my.cardgate.com/) and retrieve your RESTful A
 4. Click on **Install now** and then **Activate**.
 
 5. For the settings of the plug-in:  
-   Go to [My Cardgate](https://my.cardgate.com/).  
+   Go to [My CardGate](https://my.cardgate.com/).  
    **N.B.** For the **Testmode settings** click your **user avatar** on the **top right** and choose **To Staging**.  
    Go to **Management, Sites** and click on the ID of the site you wish to set.  
    Under **Connection to the website**, click on the **Setup your webshop** button, choose your plug-in type, and send the data to your website.
@@ -58,7 +58,7 @@ and **WooCommerce plug-in 3.x or higher**.
 3. Click on **Install now** and then **Activate**. 
 
 4. For the settings of the plug-in:
-   Go to [My Cardgate](https://my.cardgate.com/) 
+   Go to [My CardGate](https://my.cardgate.com/) 
    **N.B.** For the **Testmode settings** click your **user avatar** on the **top right** and choose **To Staging**.  
    Go to **Management, Sites** and click on the **ID** of the site you wish to set.  
    Under **Connection to the website**, click on the **Setup your webshop** button,  
@@ -71,7 +71,7 @@ and **WooCommerce plug-in 3.x or higher**.
 7. In the **admin** select **WooCommerce, Settings, Checkout**.
    Here you see the CardGate payment methods.  
    **Attention**: The CardGate payment methods are only visible in WooCommerce,  
-   if the Site ID and Hash Key were entered correctly.
+   if the site ID and hash key were entered correctly.
 
 8. Select a **payment method** and set it correctly.
    Repeat this **for every payment method** you wish to activate.
