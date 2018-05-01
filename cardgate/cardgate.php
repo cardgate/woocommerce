@@ -287,7 +287,7 @@ class cardgate {
                     </tr>
 					<tr>
 						<th scope="row">
-						<label for="cgp_hashkey">' . __ ( 'Hashkey', 'cardgate' ) . '</label>
+						<label for="cgp_hashkey">' . __ ( 'Hash key', 'cardgate' ) . '</label>
 						</th>
 						<td><input type="text" style="width:150px;" id="cgp_hashkey" name="cgp_hashkey" value="' . get_option ( 'cgp_hashkey' ) . '"/>
 						</td>
@@ -301,7 +301,7 @@ class cardgate {
 					</tr>
 				    <tr> 
 						<th scope="row">
-						<label for="cgp_merchant_api_key">' . __ ( 'Merchant API Key', 'cardgate' ) . '</label>
+						<label for="cgp_merchant_api_key">' . __ ( 'API key', 'cardgate' ) . '</label>
 						</th>
 						<td><input type="text" style="width:600px;" id="cgp_merchant_api_key" name="cgp_merchant_api_key" value="' . get_option ( 'cgp_merchant_api_key' ) . '"/>
 						</td>
