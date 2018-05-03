@@ -58,7 +58,7 @@ and **WooCommerce plug-in 3.x or higher**.
 3. Click on **Install now** and then **Activate**. 
 
 4. For the settings of the plug-in:
-   Go to [My CardGate](https://my.cardgate.com/) 
+   Go to [My CardGate](https://my.cardgate.com/)  
    **N.B.** For the **Testmode settings** click your **user avatar** on the **top right** and choose **To Staging**.  
    Go to **Management, Sites** and click on the **ID** of the site you wish to set.  
    Under **Connection to the website**, click on the **Setup your webshop** button,  

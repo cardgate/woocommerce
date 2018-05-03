@@ -10,7 +10,7 @@ Deze plugin is geschikt voor WooCommerce versie  **3.X**.
 
 Voor het gebruik van deze module zijn CardGate RESTful gegevens nodig.  
 Bezoek hiervoor [Mijn CardGate](https://my.cardgate.com/) en haal daar je  
-RESTful API gebruikersnaam en wachtwoord op, of neem contact op met je accountmanager.  
+gegevens op, of neem contact op met je accountmanager.  
 
 ## Installatie
 
