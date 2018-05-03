@@ -9,8 +9,8 @@ Deze plugin is geschikt voor WooCommerce versie  **3.X**.
 ## Voorbereiding
 
 Voor het gebruik van deze module zijn CardGate RESTful gegevens nodig.  
-Bezoek hiervoor [Mijn CardGate](https://my.cardgate.com/) en haal daar je  
-gegevens op, of neem contact op met je accountmanager.  
+Bezoek hiervoor [Mijn CardGate](https://my.cardgate.com/) en haal daar je gegevens op,  
+of neem contact op met je accountmanager.  
 
 ## Installatie
 
