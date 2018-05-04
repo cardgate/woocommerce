@@ -9,8 +9,8 @@ Deze plugin is geschikt voor WooCommerce versie  **3.X**.
 ## Voorbereiding
 
 Voor het gebruik van deze module zijn CardGate RESTful gegevens nodig.  
-Bezoek hiervoor [Mijn CardGate](https://my.cardgate.com/) en haal daar je  
-RESTful API gebruikersnaam en wachtwoord op, of neem contact op met je accountmanager.  
+Bezoek hiervoor [Mijn CardGate](https://my.cardgate.com/) en haal daar je gegevens op,  
+of neem contact op met je accountmanager.  
 
 ## Installatie
 
@@ -22,7 +22,7 @@ RESTful API gebruikersnaam en wachtwoord op, of neem contact op met je accountma
 
 4. De eerdere instellingen blijven hierbij behouden.  
    **LET WEL:** Indien je update van **Woocommerce 2.x** naar **Woocommerce 3.x**,  
-   moet je ook de **Merchant ID** en de **Merchant API key** invullen bij je Cardgate plug-in.
+   moet je ook de **Merchant ID** en de **API key** invullen bij je Cardgate plug-in.
    
 5. Voor de instellingen van de plug-in:  
    Ga naar [Mijn CardGate](https://my.cardgate.com/).  
@@ -71,7 +71,7 @@ alsook de **WooCommerce plug-in 2.1.x of hoger**.
 7. In de **admin** selecteer **WooCommerce, Instellingen, Afrekenen**.  
    Hier zie je de CardGate betaalmethoden.  
    **Let op:** De CardGate betaalmethoden zijn alleen zichtbaar in WooCommerce,  
-   indien zowel de Site ID als de Hash Key (Codeersleutel) correct zijn ingevuld.  
+   indien zowel de site ID als de hash key correct zijn ingevuld.  
    
 8. Selecteer een **betaalmethode** en stel deze correct in.  
    Herhaal dit voor **iedere betaalmethode** die je wenst te activeren.
