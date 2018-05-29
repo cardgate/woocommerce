@@ -4,7 +4,7 @@ Contributors: cardgate
 Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, MisterCash, SofortBanking, OverBoeking, PayPal, Giropay, DirectDebit, Webmoney
 Requires at least: 4.2
 Tested up to: 4.9
-Stable tag: 3.1.5
+Stable tag: 3.1.6
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -60,8 +60,11 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 
 == Changelog ==
 
+= 3.1.6 =
+* Updated Dutch translation text
+
 = 3.1.5 =
-* Updated iDEAL bank issuer text.
+* Updated iDEAL bank issuer text
 
 = 3.1.4 =
 * Updated consumer address data
