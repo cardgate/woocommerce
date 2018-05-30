@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * Plugin Name: CardGate
  * Plugin URI: http://cardgate.com
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
@@ -307,7 +307,7 @@ class cardgate {
 						</td>
 					</tr>
 					<tr>
-						<td colspan="2">' . __('<b>Use the Settings button</b> in your <a href="https://my.cardgate.com/">merchant back-office</a> to set all these values, as explained in the <a href="https://www.cardgate.com/en/plug_in/woocommerce/?link=WooCommerce3x-1-manual" target="_blank">installation instructions</a> of this plugin.', 'cardgate') . '</td>
+						<td colspan="2">' . __('<b>Use the Settings button</b> in <a href="https://my.cardgate.com/">My CardGate</a> to set all these values, as explained in the <a href="https://github.com/cardgate/woocommerce/blob/master/README.md" target="_blank">installation instructions</a> of this plugin.', 'cardgate') . '</td>
 					</tr>
 					<tr>
 						<td colspan="2">' . __('These settings apply to all CardGate payment methods used in the WooCommerce plugin.', 'cardgate') . '</td>
@@ -838,7 +838,7 @@ class cardgate {
         ?>
 <div class="error notice">
 	<p>
-		<b>CardGate: </b> <?php echo  __( '<b>Use the Settings button</b> in your <a href="https://my.cardgate.com/">merchant back-office</a> to set all these values, as explained in the <a href="https://www.cardgate.com/en/plug_in/woocommerce/?link=WooCommerce3x-1-manual" target="_blank">installation instructions</a> of this plugin.', 'cardgate' ); ?></p>
+		<b>CardGate: </b> <?php echo  __('<b>Use the Settings button</b> in <a href="https://my.cardgate.com/">My CardGate</a> to set all these values, as explained in the <a href="https://github.com/cardgate/woocommerce/blob/master/README.md" target="_blank">installation instructions</a> of this plugin.', 'cardgate' ); ?></p>
 </div>
 <?php
     }

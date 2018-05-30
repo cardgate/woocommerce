@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: CardGate\n"
-"POT-Creation-Date: 2017-08-21 16:06+0200\n"
-"PO-Revision-Date: 2018-05-29 14:12+0200\n"
+"POT-Creation-Date: 2018-05-30 12:57+0200\n"
+"PO-Revision-Date: 2018-05-30 12:59+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: nl_NL\n"
@@ -21,7 +21,7 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#: cardgate.php:240
+#: cardgate.php:245
 msgid ""
 "The settings are not correct for the Mode you chose.<br>For instructions on "
 "how to obtain the correct values, please consult our plugin manual at "
@@ -29,7 +29,7 @@ msgstr ""
 "De instellingen zijn niet correct voor de gekozen Mode.<br> De juiste "
 "waarden kun je importeren door onze handleiding te raadplegen bij "
 
-#: cardgate.php:249
+#: cardgate.php:254
 msgid ""
 "The CardGate payment methods will only be visible in the WooCommerce Plugin, "
 "once the Site ID and Hashkey have been filled in."
@@ -37,36 +37,35 @@ msgstr ""
 "De CardGate betaalmethoden zijn alleen zichtbaar in WooCommerce, als de Site "
 "ID en Codeersleutel ingevuld zijn."
 
-#: cardgate.php:257
+#: cardgate.php:262
 msgid "CardGate Settings"
 msgstr "CardGate Instellingen"
 
-#: cardgate.php:267
+#: cardgate.php:272
 msgid "Mode"
 msgstr "Mode"
 
-#: cardgate.php:285
-msgid "Hashkey"
-msgstr "Codeersleutel"
+#: cardgate.php:290
+msgid "Hash key"
+msgstr "Hash key"
 
-#: cardgate.php:299
-msgid "Merchant API Key"
-msgstr "Merchant API Key"
+#: cardgate.php:304
+msgid "API key"
+msgstr "API key"
 
-#: cardgate.php:305
+#: cardgate.php:310 cardgate.php:841
 msgid ""
-"<b>Use the Settings button</b> in your <a href=\"https://my.cardgate.com/"
-"\">merchant back-office</a> to set all these values, as explained in the <a "
-"href=\"https://www.cardgate.com/en/plug_in/woocommerce/?link=WooCommerce3x-1-"
-"manual\" target=\"_blank\">installation instructions</a> of this plugin."
+"<b>Use the Settings button</b> in <a href=\"https://my.cardgate.com/\">My "
+"CardGate</a> to set all these values, as explained in the <a href=\"https://"
+"github.com/cardgate/woocommerce/blob/master/README.md\" target=\"_blank"
+"\">installation instructions</a> of this plugin."
 msgstr ""
 "<b>Gebruik de Instellingen knop</b> in uw <a href=\"https://my.cardgate.com/"
-"\">merchant back-office</a> voor het instellen van al deze waarden, zoals "
-"uitgelegd in de <a href=\"https://www.cardgate.com/plug_in/woocommerce/?"
-"link=WooCommerce3x-1-manual\" target=\"_blank\">handleiding</a> van deze "
-"plugin."
+"\">Mijn CardGate</a> voor het instellen van al deze waarden, zoals uitgelegd "
+"in de <a href=\"https://github.com/cardgate/woocommerce/blob/master/"
+"README_NL.md\" target=\"_blank\">handleiding</a> van deze plugin."
 
-#: cardgate.php:308
+#: cardgate.php:313
 msgid ""
 "These settings apply to all CardGate payment methods used in the WooCommerce "
 "plugin."
@@ -74,67 +73,67 @@ msgstr ""
 "Deze instellingen hebben betrekking op alle CardGate betaalmethoden die "
 "gebruikt worden in Woocommerce."
 
-#: cardgate.php:319
+#: cardgate.php:324
 msgid "Save Changes"
 msgstr "Instellingen opslaan"
 
-#: cardgate.php:341
+#: cardgate.php:346
 msgid "CardGate Payments"
 msgstr "CardGate Betalingen"
 
-#: cardgate.php:347
+#: cardgate.php:352
 msgid "Search Payments"
 msgstr "Doorzoek Betalingen"
 
-#: cardgate.php:370
+#: cardgate.php:375
 msgid "Settings"
 msgstr "Instellingen"
 
-#: cardgate.php:375
+#: cardgate.php:380
 msgid "Payments Table"
 msgstr "Betalingen tabel"
 
-#: cardgate.php:530
+#: cardgate.php:536
 msgid "Your payment has failed. Please choose an other payment method."
 msgstr "Uw betaling is niet voltooid. Kies een andere betaalmehode a.u.b."
 
-#: cardgate.php:559 classes/CGP_Common_Gateway.php:106
+#: cardgate.php:565 classes/CGP_Common_Gateway.php:107
 msgid "Title"
 msgstr "Titel"
 
-#: cardgate.php:569
+#: cardgate.php:575
 msgid "Slug"
 msgstr "Slug"
 
-#: cardgate.php:579
+#: cardgate.php:585
 msgid "Content"
 msgstr "Inhoud"
 
-#: cardgate.php:718
+#: cardgate.php:728
 msgid "Add Extra Fees"
 msgstr "Voeg extra kosten toe"
 
-#: cardgate.php:720
+#: cardgate.php:730
 msgid "Extra Fee"
 msgstr "Extra kosten"
 
-#: cardgate.php:727
+#: cardgate.php:737
 msgid "Label for Extra Fee"
 msgstr "Label voor Extra Kosten"
 
-#: cardgate.php:730
+#: cardgate.php:740
 msgid "My Custom Label"
 msgstr "Mijn aangepaste label"
 
-#: cardgate.php:733
+#: cardgate.php:743
 msgid "Fee type"
 msgstr "Kostenberekening"
 
-#: cardgate.php:736
+#: cardgate.php:746
 msgid "Add Fee to Total"
 msgstr "Tel op bij het Totaal"
 
-#: cardgate.php:737
+#: cardgate.php:747
 msgid "Percentage of Total"
 msgstr "Percentage van het Totaal"
 
@@ -142,34 +141,34 @@ msgstr "Percentage van het Totaal"
 msgid "Bank Option"
 msgstr "Bank Opties"
 
-#: classes/CGP_Common_Gateway.php:100
+#: classes/CGP_Common_Gateway.php:101
 msgid "Enable/Disable"
 msgstr "Inschakelen/uitschakelen"
 
-#: classes/CGP_Common_Gateway.php:102
+#: classes/CGP_Common_Gateway.php:103
 msgid "Enable "
 msgstr "Inschakelen van "
 
-#: classes/CGP_Common_Gateway.php:108
+#: classes/CGP_Common_Gateway.php:109
 msgid "Payment method description that the customer will see on your checkout."
 msgstr "Dit bepaalt de titel die de gebruiker ziet tijdens het afrekenen."
 
-#: classes/CGP_Common_Gateway.php:113
+#: classes/CGP_Common_Gateway.php:114
 msgid "Description"
 msgstr "Beschrijving"
 
-#: classes/CGP_Common_Gateway.php:115
+#: classes/CGP_Common_Gateway.php:116
 msgid "Payment method description that the customer will see on your website."
 msgstr ""
 "Omschrijving van de betaalmethode die de klant ziet tijdens het afrekenen."
 
-#: classes/CGP_Common_Gateway.php:116
+#: classes/CGP_Common_Gateway.php:117
 msgid "Pay with "
 msgstr "Betaal met "
 
-#: classes/CGP_Common_Gateway.php:458
+#: classes/CGP_Common_Gateway.php:573
 msgid " Choose your bank first, please"
-msgstr "Kies eerst uw bank a.u.b"
+msgstr " Kies eerst uw bank a.u.b"
 
 #: classes/Cardgate_PaymentsListTable.php:111
 msgid "No payments found."
@@ -240,6 +239,39 @@ msgstr "http://cardgate.com"
 #. Description of the plugin/theme
 msgid "Integrates Cardgate Gateway for WooCommerce into WordPress"
 msgstr "Integratie van CardGate Gateway voor WooCommerce in WordPress"
+
+#~ msgid ""
+#~ "Use the Settings button</b> in  <a href=\"https://my.cardgate.com/\">My "
+#~ "CardGate</a> to set all these values, as explained in the <a href="
+#~ "\"https://www.cardgate.com/en/plug_in/woocommerce/?link=WooCommerce3x-1-"
+#~ "manual\" target=\"_blank\">installation instructions</a> of this plugin."
+#~ msgstr ""
+#~ "<b>Gebruik de Instellingen knop</b> in <a href=\"https://my.cardgate.com/"
+#~ "\">Mijn CardGate</a> voor het instellen van al deze waarden, zoals "
+#~ "uitgelegd in de <a href=\"https://www.cardgate.com/plug_in/woocommerce/?"
+#~ "link=WooCommerce3x-1-manual\" target=\"_blank\">handleiding</a> van deze "
+#~ "plugin."
+
+#~ msgid "Use the Settings button"
+#~ msgstr "Gebruik de Instellingen knop"
+
+#~ msgid " in your "
+#~ msgstr " in uw "
+
+#~ msgid "merchant back-office"
+#~ msgstr "merchant back-office"
+
+#~ msgid " to set all these values, as explained in the "
+#~ msgstr " om al deze waarden in te stellen, zoals uitgelegd in de "
+
+#~ msgid " installation instructions "
+#~ msgstr " Installatie instructies "
+
+#~ msgid " of this plugin."
+#~ msgstr " van deze plugin."
+
+#~ msgid "Merchant API Key"
+#~ msgstr "Merchant API Key"
 
 #~ msgid "Live or Test mode of the plugin."
 #~ msgstr "Live of Test mode van de plugin."
