@@ -184,6 +184,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 				$oTransaction->setIssuer ( $this->bankOption );
 			}
 			method_exists ( $oOrder, 'get_billing_email' ) ? $billing_email = $oOrder->get_billing_email () : $billing_email = $oOrder->billing_email;
+			method_exists ( $oOrder, 'get_billing_phone' ) ? $billing_phone = $oOrder->get_billing_phone () : $billing_phone = $oOrder->billing_phone;
 			method_exists ( $oOrder, 'get_billing_first_name' ) ? $billing_first_name = $oOrder->get_billing_first_name () : $billing_first_name = $oOrder->billing_first_name;
 			method_exists ( $oOrder, 'get_billing_last_name' ) ? $billing_last_name = $oOrder->get_billing_last_name () : $billing_last_name = $oOrder->billing_last_name;
 			method_exists ( $oOrder, 'get_billing_last_name' ) ? $billing_last_name = $oOrder->get_billing_last_name () : $billing_last_name = $oOrder->billing_last_name;
@@ -198,6 +199,9 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$oConsumer = $oTransaction->getConsumer();
 			if ($billing_email != '') {
 				$oConsumer->setEmail ( $billing_email );
+			}
+			if ($billing_phone != '') {
+			    $oConsumer->setPhone($billing_phone);
 			}
 			if ($billing_first_name != '') {
 				$oConsumer->address ()->setFirstName ( $billing_first_name );
@@ -221,6 +225,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			if ($billing_country != '') {
 				$oConsumer->address ()->setCountry ( $billing_country );
 			}
+			
 			
 			method_exists ( $oOrder, 'get_shipping_first_name' ) ? $shipping_first_name = $oOrder->get_shipping_first_name () : $shipping_first_name = $oOrder->shipping_first_name;
 			method_exists ( $oOrder, 'get_shipping_last_name' ) ? $shipping_last_name = $oOrder->get_shipping_last_name () : $shipping_last_name = $oOrder->shipping_last_name;
