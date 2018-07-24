@@ -452,7 +452,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
                 $iPrice = round(($oItem->get_total() * 100) / $iQty);
                 $iTax = round(($oItem->get_total_tax() * 100) / $iQty);
                 $iTotal = round($iPrice + $iTax);
-                $iTaxrate = ($iTax > 0 ? round((($oItem->get_total_tax() * 100) / $iQty) / (($oItem->get_total() * 100) / $iQty), 1) : 0);
+                $iTaxrate = ($iTax > 0 ? round((($oItem->get_total_tax()) / $iQty) / (($oItem->get_total() * 100) / $iQty), 1) : 0);
             } else {
                 
                 $aItem = $oItem;
