@@ -492,7 +492,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
                     $iPrice = round($oShipping->get_total() * 100);
                     $iTax = round($oShipping->get_total_tax() * 100);
                     $iTotal = round($iPrice + $iTax);
-                    $iTaxrate = ($iTax > 0 ? round(($iTotal / $iPrice - 1) * 100, 2) : 0);
+                    $iTaxrate = ($iTax > 0 ? round(($oShipping->get_total_tax()/ $oShipping->get_total()) * 100, 1) : 0);
                 } else {
                     $aShipping = $oShipping;
                     $sName = $aShipping['name'];
@@ -500,7 +500,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
                     $iPrice = round($oOrder->get_total_shipping() * 100);
                     $iTax = round($oOrder->get_shipping_tax() * 100);
                     $iTotal = round($iPrice + $iTax);
-                    $iTaxrate = ($iTax > 0 ? round(($iTotal / $iPrice - 1) * 100, 2) : 0);
+                    $iTaxrate = ($iTax > 0 ? round(($oOrder->get_shipping_tax()/ $oOrder->get_total_shipping()) * 100, 1) : 0);
                 }
                 $nr ++;
                 $items[$nr]['type'] = 'shipping';
