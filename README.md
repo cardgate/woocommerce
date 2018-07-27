@@ -1,6 +1,6 @@
 ![CardGate](https://cdn.curopayments.net/thumb/200/logos/cardgate.png)
 
-# CardGate module for WooCommerce
+# CardGate plug-in for WooCommerce
 
 ## Support
 
