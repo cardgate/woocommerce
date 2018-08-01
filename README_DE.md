@@ -77,7 +77,7 @@ und **WooCommerce Plugin 3.x oder höher**.
 9. Wenn Sie mit dem **Testen** abgeschlossen haben, gehen Sie dann zu Ihren CardGate Einstellungen  
    und schalten Sie den **Testmodus** in den **Livemodus** um und **speichern** Sie die Einstellung.
  
-10. **Achtung**: Die Einstellungen für den  **Livemodus** können anders als die Einstellungen des  **Testmodus** sein. Siehe auch Punkt 5. 
+10. **Achtung**: Die Einstellungen für den  **Livemodus** können anders als die Einstellungen des  **Testmodus** sein. Siehe auch Punkt 4. 
 
 ## Anforderungen
 
