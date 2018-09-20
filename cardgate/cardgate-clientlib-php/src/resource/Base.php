@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016 CardGate B.V.
+ * Copyright (c) 2018 CardGate B.V.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,15 +34,14 @@ namespace cardgate\api\resource {
 
 		/**
 		 * The client associated with this resource.
-		 * @var Client
+		 * @var \cardgate\api\Client
 		 * @access private
 		 */
 		protected $_oClient;
 
 		/**
 		 * The constructor.
-		 * @param Client $oClient_ The client to associate the resource with.
-		 * @return Base
+		 * @param \cardgate\api\Client $oClient_ The client to associate the resource with.
 		 * @access public
 		 * @api
 		 */
