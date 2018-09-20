@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016 CardGate B.V.
+ * Copyright (c) 2018 CardGate B.V.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,12 +32,12 @@ namespace cardgate\api {
 	 *
 	 * @method Consumer setEmail( string $sEmail_ )
 	 * @method string getEmail()
-	 * @method boolean hasEmail()
+	 * @method bool hasEmail()
 	 * @method Consumer unsetEmail()
 	 *
 	 * @method Consumer setPhone( string $sPhone_ )
 	 * @method string getPhone()
-	 * @method boolean hasPhone()
+	 * @method bool hasPhone()
 	 * @method Consumer unsetPhone()
 	 */
 	final class Consumer extends Entity {

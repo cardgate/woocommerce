@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016 CardGate B.V.
+ * Copyright (c) 2018 CardGate B.V.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -66,6 +66,8 @@ namespace cardgate\api {
 		/**
 		 * @ignore
 		 * @internal The __call method translates get-, set-, unset- and has-methods to their configured fields.
+		 * @return $this|mixed|bool Return $this on set and unset, mixed on get and bool on has
+		 * @throws Exception|\ReflectionException
 		 */
 		public function __call( $sMethod_, $aArgs_ ) {
 			$sClassName = ( new \ReflectionClass( $this ) )->getShortName();

@@ -4,7 +4,7 @@ Contributors: cardgate
 Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, MisterCash, SofortBanking, OverBoeking, PayPal, Giropay, DirectDebit, Webmoney
 Requires at least: 4.2
 Tested up to: 4.9
-Stable tag: 3.1.10
+Stable tag: 3.1.11
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -17,6 +17,7 @@ This plug-in contains the following payment methods from CardGate for WooCommerc
 <ul>
 <li>Afterpay</li>
 <li>Banktransfer</li>
+<li>Billink</li>
 <li>Bitcoin</li>
 <li>Creditcard</li>
 <li>DirectDebit</li>
@@ -60,6 +61,9 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 3. Payment settings for a specific CardGate payment method.
 
 == Changelog ==
+
+= 3.1.11 =
+* New payment method: Billink 
 
 = 3.1.10 =
 * New payment method: Paysafecard 
