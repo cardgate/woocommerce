@@ -686,6 +686,7 @@ class cardgate {
         $methods[] = 'WC_CardgateDirectDebit';
         $methods[] = 'WC_CardgateGiropay';
         $methods[] = 'WC_CardgateIdeal';
+        $methods[] = 'WC_CardgateIdealqr';
         $methods[] = 'WC_CardgateKlarna';
         $methods[] = 'WC_CardgatePayPal';
         $methods[] = 'WC_CardgatePaysafecard';

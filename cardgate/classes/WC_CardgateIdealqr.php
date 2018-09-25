@@ -1,27 +1,27 @@
 <?php
 
 /**
- * Title: WooCommerce Cardgate Paysafecard gateway
+ * Title: WooCommerce Cardgate iDEAL QR gateway
  * Description: 
  * Copyright: Copyright (c) 2012
  * Company: Cardgate
  * @author CardGate
  * @version 1.0
  */
-class WC_CardgatePaysafecard extends CGP_Common_Gateway {
+class WC_CardgateIdealqr extends CGP_Common_Gateway {
 	
 	/**
 	 * The unique ID of this payment gateway
 	 *
 	 * @const ID string
 	 */
-	const ID = 'cardgatepaysafecard';
-	const MethodTitle = 'Cardgate Paysafecard';
-	const AdminTitle = 'Cardgate Paysafecard';
-	const PaymentName = 'Paysafecard';
+	const ID = 'cardgateIdealqr';
+	const MethodTitle = 'Cardgate iDEAL QR';
+	const AdminTitle = 'Cardgate iDEAL QR';
+	const PaymentName = 'iDEAL QR';
 	const Company = 'Cardgate';
 	const HasFields = false; // extra field for bank data
-	const PaymentMethod = 'paysafecard';
+	const PaymentMethod = 'idealqr';
 	
 	// ////////////////////////////////////////////////
 	
