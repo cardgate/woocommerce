@@ -16,13 +16,15 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 
     var $bankOption;
 
+    var $logo;
+
     // ////////////////////////////////////////////////
-    function __construct() {}
+    public function __construct() {}
 
     /**
      * Show the description if set, and show the bank options.
      */
-    function payment_fields() {
+    public function payment_fields() {
         if ($this->description) {
             echo wpautop(wptexturize($this->description));
         }
@@ -36,24 +38,20 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
     /**
      * Generate the bank options
      */
-    function generate_bank_html() {
+    public function generate_bank_html() {
         $aIssuers = $this->getBankOptions();
         
         $html = '<fieldset>
-            <p class="form-row form-row-first ">
+                <p class="form-row form-row-first ">
                 <label for="cc-expire-month">' . __('Bank Option', 'cardgate') . '<span class="required">*</span></label>';
         $html .= '<select name="cgp_bank_options" id="cgp_bank_options" class="woocommerce-select">';
         $html .= '<option value="0">Kies uw bank</option>';
         foreach ($aIssuers as $id => $name) {
             $html .= '<option value="' . $id;
-            if (isset($this->bankOption) && $id == $this->bankOption) {
-                $html .= ' selected="selected" ';
-            }
+            $html .= ((isset($this->bankOption) && $id == $this->bankOption) ? ' selected="selected" ' : '');
             $html .= '">' . $name . '</option>';
         }
-        $html .= '</select>
-            </p> 
-        </fieldset>';
+        $html .= '</select></p></fieldset>';
         echo $html;
     }
 
@@ -63,6 +61,27 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
      * Fetch bank options from Card Gate
      */
     private function getBankOptions() {
+        $this->checkBankOptions();
+        $aIssuers = get_option('sIssuers');
+        return $aIssuers;
+    }
+
+    private function checkBankOptions() {
+        if (get_option('IssuerRefresh')) {
+            $iIssuerRefresh = (int) get_option('IssuerRefresh');
+            if ($iIssuerRefresh < mktime()) {
+                $this->cacheBankOptions();
+            }
+        } else {
+            $this->cacheBankOptions();
+        }
+    }
+
+    private function cacheBankOptions() {
+        $iCacheTime = 24 * 60 * 60;
+        $iIssuerRefresh = mktime() + $iCacheTime;
+        update_option('IssuerRefresh', $iIssuerRefresh, true);
+        
         try {
             
             require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
@@ -84,12 +103,11 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             ];
         }
         
-        $options = array();
-        
         foreach ($aIssuers as $aIssuer) {
-            $options[$aIssuer['id']] = $aIssuer['name'];
+            $aOptions[$aIssuer['id']] = $aIssuer['name'];
         }
-        return $options;
+        
+        update_option('sIssuers', $aOptions, true);
     }
 
     // //////////////////////////////////////////////
@@ -97,29 +115,29 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
     /**
      * Initialise Gateway Settings Form Fields
      */
-    function init_form_fields() {
-        $this->form_fields = array(
-            'enabled' => array(
+    public function init_form_fields() {
+        $this->form_fields = [
+            'enabled' => [
                 'title' => __('Enable/Disable', 'cardgate'),
                 'type' => 'checkbox',
                 'label' => __('Enable ' . $this->payment_name, 'cardgate'),
                 'default' => 'no'
-            ),
-            'title' => array(
+            ],
+            'title' => [
                 'title' => __('Title', 'cardgate'),
                 'type' => 'text',
-                'description' => __('Payment method description that the customer will see on your checkout.', 'cardgate'),
+                'description' => __('Payment method title that the customer will see on your checkout.', 'cardgate'),
                 'default' => $this->payment_name,
                 'desc_tip' => true
-            ),
-            'description' => array(
+            ],
+            'description' => [
                 'title' => __('Description', 'cardgate'),
                 'type' => 'textarea',
                 'description' => __('Payment method description that the customer will see on your website.', 'cardgate'),
                 'default' => __('Pay with ', 'cardgate') . $this->payment_name,
                 'desc_tip' => true
-            )
-        );
+            ]
+        ];
     }
 
     // ////////////////////////////////////////////////
@@ -149,7 +167,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
      *
      * @param integer $iOrderId            
      */
-    function process_payment($iOrderId) {
+    public function process_payment($iOrderId) {
         global $woocommerce;
         require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
         
@@ -182,9 +200,9 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             
             // Configure payment option.
             $oTransaction->setPaymentMethod($this->payment_method);
-            if ($this->payment_method == 'idealpro') {
+            if ($this->payment_method == 'idealpro')
                 $oTransaction->setIssuer($this->bankOption);
-            }
+            
             method_exists($oOrder, 'get_billing_email') ? $billing_email = $oOrder->get_billing_email() : $billing_email = $oOrder->billing_email;
             method_exists($oOrder, 'get_billing_phone') ? $billing_phone = $oOrder->get_billing_phone() : $billing_phone = $oOrder->billing_phone;
             method_exists($oOrder, 'get_billing_first_name') ? $billing_first_name = $oOrder->get_billing_first_name() : $billing_first_name = $oOrder->billing_first_name;
@@ -198,35 +216,27 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             method_exists($oOrder, 'get_billing_country') ? $billing_country = $oOrder->get_billing_country() : $billing_country = $oOrder->billing_country;
             
             // Configure customer.
-            $oConsumer = $oTransaction->getConsumer();
-            if ($billing_email != '') {
-                $oConsumer->setEmail($billing_email);
-            }
-            if ($billing_phone != '') {
-                $oConsumer->setPhone($billing_phone);
-            }
-            if ($billing_first_name != '') {
-                $oConsumer->address()->setFirstName($billing_first_name);
-            }
-            if ($billing_last_name != '') {
-                $oConsumer->address()->setLastName($billing_last_name);
-            }
             $billing_address = trim($billing_address_1 . ' ' . $billing_address_2);
-            if ($billing_address != '') {
+            
+            $oConsumer = $oTransaction->getConsumer();
+            if ($billing_email != '')
+                $oConsumer->setEmail($billing_email);
+            if ($billing_phone != '')
+                $oConsumer->setPhone($billing_phone);
+            if ($billing_first_name != '')
+                $oConsumer->address()->setFirstName($billing_first_name);
+            if ($billing_last_name != '')
+                $oConsumer->address()->setLastName($billing_last_name);
+            if ($billing_address != '')
                 $oConsumer->address()->setAddress(trim($billing_address_1 . ' ' . $billing_address_2));
-            }
-            if ($billing_postcode != '') {
+            if ($billing_postcode != '')
                 $oConsumer->address()->setZipCode($billing_postcode);
-            }
-            if ($billing_city != '') {
+            if ($billing_city != '')
                 $oConsumer->address()->setCity($billing_city);
-            }
-            if ($billing_state != '') {
+            if ($billing_state != '')
                 $oConsumer->address()->setState($billing_state);
-            }
-            if ($billing_country != '') {
+            if ($billing_country != '')
                 $oConsumer->address()->setCountry($billing_country);
-            }
             
             method_exists($oOrder, 'get_shipping_first_name') ? $shipping_first_name = $oOrder->get_shipping_first_name() : $shipping_first_name = $oOrder->shipping_first_name;
             method_exists($oOrder, 'get_shipping_last_name') ? $shipping_last_name = $oOrder->get_shipping_last_name() : $shipping_last_name = $oOrder->shipping_last_name;
@@ -238,28 +248,22 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             method_exists($oOrder, 'get_shipping_city') ? $shipping_city = $oOrder->get_shipping_city() : $shipping_city = $oOrder->shipping_city;
             method_exists($oOrder, 'get_shipping_country') ? $shipping_country = $oOrder->get_shipping_country() : $shipping_country = $oOrder->shipping_country;
             
-            if ($shipping_first_name != '') {
-                $oConsumer->shippingAddress()->setFirstName($shipping_first_name);
-            }
-            if ($shipping_last_name != '') {
-                $oConsumer->shippingAddress()->setLastName($shipping_last_name);
-            }
             $shipping_address = trim($shipping_address_1 . ' ' . $shipping_address_2);
-            if ($shipping_address != '') {
+            
+            if ($shipping_first_name != '')
+                $oConsumer->shippingAddress()->setFirstName($shipping_first_name);
+            if ($shipping_last_name != '')
+                $oConsumer->shippingAddress()->setLastName($shipping_last_name);
+            if ($shipping_address != '')
                 $oConsumer->shippingAddress()->setAddress(trim($shipping_address_1 . ' ' . $shipping_address_2));
-            }
-            if ($shipping_postcode != '') {
+            if ($shipping_postcode != '')
                 $oConsumer->shippingAddress()->setZipCode($shipping_postcode);
-            }
-            if ($shipping_city != '') {
+            if ($shipping_city != '')
                 $oConsumer->shippingAddress()->setCity($shipping_city);
-            }
-            if ($shipping_state != '') {
+            if ($shipping_state != '')
                 $oConsumer->shippingAddress()->setState($shipping_state);
-            }
-            if ($shipping_country != '') {
+            if ($shipping_country != '')
                 $oConsumer->shippingAddress()->setCountry($shipping_country);
-            }
             
             $oCart = $oTransaction->getCart();
             $aCartItems = $this->getCartItems($iOrderId);
@@ -295,14 +299,12 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             if (method_exists($oOrder, 'get_cancel_order_url_raw')) {
                 $sCanceUrl = $oOrder->get_cancel_order_url_raw();
             } else {
-                
                 $sCanceUrl = $oOrder->get_cancel_order_url();
             }
             
             $oTransaction->setCallbackUrl(site_url() . '/index.php?cgp_notify=true');
             $oTransaction->setSuccessUrl($this->get_return_url($oOrder));
             $oTransaction->setFailureUrl($sCanceUrl);
-            
             $oTransaction->setReference('O' . time() . $iOrderId);
             $oTransaction->setDescription('Order ' . $this->swap_order_number($iOrderId));
             
@@ -311,25 +313,25 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             $sActionUrl = $oTransaction->getActionUrl();
             
             if (NULL !== $sActionUrl) {
-                return array(
+                return [
                     'result' => 'success',
                     'redirect' => trim($sActionUrl)
-                );
+                ];
             } else {
                 $sErrorMessage = 'CardGate error: ' . htmlspecialchars($oException_->getMessage());
                 wc_add_notice($sErrorMessage, 'error');
-                return array(
+                return [
                     'result' => 'success',
                     'redirect' => $woocommerce->cart->get_checkout_url()
-                );
+                ];
             }
         } catch (cardgate\api\Exception $oException_) {
             $sErrorMessage = 'CardGate error: ' . htmlspecialchars($oException_->getMessage());
             wc_add_notice($sErrorMessage, 'error');
-            return array(
+            return [
                 'result' => 'success',
                 'redirect' => $woocommerce->cart->get_checkout_url()
-            );
+            ];
         }
     }
 
@@ -374,7 +376,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             }
         }
         
-        $data = array(
+        $data = [
             'order_id' => $order->id,
             'currency' => get_woocommerce_currency(),
             'amount' => $order->get_total() * 100,
@@ -390,9 +392,9 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             'email' => $order->billing_email,
             'status' => 'pending',
             'date_gmt' => date('Y-m-d H:i:s')
-        );
+        ];
         
-        $format = array(
+        $format = [
             '%s',
             '%s',
             '%s',
@@ -409,16 +411,16 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             '%s',
             '%s',
             '%s'
-        );
+        ];
         
         if ($payment_id == null || ! empty($sParent_ID)) {
             $wpdb->insert($table, $data, $format);
         } else {
-            $wpdb->update($table, $data, array(
+            $wpdb->update($table, $data, [
                 'id' => $payment_id
-            ), $format, array(
+            ], $format, [
                 '%d'
-            ));
+            ]);
         }
     }
 
@@ -431,7 +433,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
     private function getCartItems($iOrderId) {
         global $woocommerce;
         
-        $items = array();
         $nr = 0;
         $iCartItemTotal = 0;
         $iCartItemTaxTotal = 0;
@@ -492,7 +493,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
                     $iPrice = round($oShipping->get_total() * 100);
                     $iTax = round($oShipping->get_total_tax() * 100);
                     $iTotal = round($iPrice + $iTax);
-                    $iTaxrate = ($iTax > 0 ? round(($oShipping->get_total_tax()/ $oShipping->get_total()) * 100, 1) : 0);
+                    $iTaxrate = ($iTax > 0 ? round(($oShipping->get_total_tax() / $oShipping->get_total()) * 100, 1) : 0);
                 } else {
                     $aShipping = $oShipping;
                     $sName = $aShipping['name'];
@@ -500,7 +501,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
                     $iPrice = round($oOrder->get_total_shipping() * 100);
                     $iTax = round($oOrder->get_shipping_tax() * 100);
                     $iTotal = round($iPrice + $iTax);
-                    $iTaxrate = ($iTax > 0 ? round(($oOrder->get_shipping_tax()/ $oOrder->get_total_shipping()) * 100, 1) : 0);
+                    $iTaxrate = ($iTax > 0 ? round(($oOrder->get_shipping_tax() / $oOrder->get_total_shipping()) * 100, 1) : 0);
                 }
                 $nr ++;
                 $items[$nr]['type'] = 'shipping';
@@ -569,7 +570,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
      *
      * @since 1.0.0
      */
-    function validate_fields() {
+    public function validate_fields() {
         global $woocommerce;
         
         if ($_POST['payment_method'] == 'cardgateideal') {
@@ -589,7 +590,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
     /**
      * retrieve the Woocommerce version used
      */
-    function get_woocommerce_version() {
+    public function get_woocommerce_version() {
         if (! function_exists('get_plugins'))
             require_once (ABSPATH . 'wp-admin/includes/plugin.php');
         $plugin_folder = get_plugins('/woocommerce');
@@ -611,11 +612,9 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
         $qry = $wpdb->prepare("SELECT post_id, meta_value FROM $tableName WHERE  meta_key='%s' AND post_id=%s", '_order_number', $order_id);
         
         $seq_order_ids = $wpdb->get_results($qry, ARRAY_A);
-        if (count($seq_order_ids) > 0) {
-            foreach ($seq_order_ids as $k => $v) {
+        if (count($seq_order_ids) > 0)
+            foreach ($seq_order_ids as $k => $v)
                 return $v['meta_value'];
-            }
-        }
         return $order_id;
     }
 
@@ -627,12 +626,37 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
         if (is_object($oProduct) && method_exists($oProduct, 'get_sku')) {
             $sSku = $oProduct->get_sku();
             
-            if ($sSku == null || $sSku == '') {
+            if ($sSku == null || $sSku == '')
                 return 'SKU_' . $oProduct->get_id();
-            } else {
-                return $sSku;
-            }
+            return $sSku;
         }
         return 'SKU_UNDETERMINED';
     }
+
+    public function modify_icon($icon, $id) {
+        if (! $id || $id != $this->id)
+            return $icon;
+        
+        $payment_gateways = WC()->payment_gateways()->payment_gateways();
+        if (! isset($payment_gateways[$id]))
+            return $icon;
+        
+        $payment_gateway = $payment_gateways[$id];
+        if (isset($payment_gateway->company) && $payment_gateway->company == 'CardGate') {
+            $icon = 'https://cdn.curopayments.net/images/paymentmethods/' . $this->payment_method . '.svg';
+            $img = '<img style="max-width:40px; max-height:40px;float:right;" src="' . WC_HTTPS::force_https_url(esc_url($icon)) . '" alt="' . esc_attr($payment_gateway->get_title()) . '" />';
+            $display = get_option('cgp_checkoutdisplay', 'withoutlogo');
+            switch ($display) {
+                case 'withoutlogo':
+                    return '';
+                    break;
+                case 'withlogo':
+                    return $img;
+                    break;
+            }
+        } else {
+            return $icon;
+        }
+    }
 }
+
