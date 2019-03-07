@@ -16,17 +16,21 @@ This plug-in contains the following payment methods from CardGate for WooCommerc
 
 <ul>
 <li>Afterpay</li>
+<li>Bancontact</li>
 <li>Banktransfer</li>
 <li>Billink</li>
 <li>Bitcoin</li>
 <li>Creditcard</li>
 <li>DirectDebit</li>
+<li>Gift Card</li>
 <li>Giropay</li>
 <li>iDEAL</li>
+<li>iDEAL QR</li>
 <li>Klarna</li>
 <li>MisterCash</li>
 <li>PayPal</li>
 <li>Paysafecard</li>
+<li>Paysafecash</li>
 <li>Przelewy24</li>
 <li>Sofortbanking</li>
 </ul>
