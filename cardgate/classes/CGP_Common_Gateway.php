@@ -69,7 +69,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
     private function checkBankOptions() {
         if (get_option('IssuerRefresh')) {
             $iIssuerRefresh = (int) get_option('IssuerRefresh');
-            if ($iIssuerRefresh < mktime()) {
+            if ($iIssuerRefresh < time()) {
                 $this->cacheBankOptions();
             }
         } else {
@@ -79,7 +79,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 
     private function cacheBankOptions() {
         $iCacheTime = 24 * 60 * 60;
-        $iIssuerRefresh = mktime() + $iCacheTime;
+        $iIssuerRefresh = time() + $iCacheTime;
         update_option('IssuerRefresh', $iIssuerRefresh, true);
         
         try {

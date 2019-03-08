@@ -67,7 +67,8 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 == Changelog ==
 
 = 3.1.11 =
-* New payment method: Billink 
+* New payment methods: Billink, Gift Card, Paysafecash
+* Cache for Bank issuers. 
 
 = 3.1.10 =
 * New payment method: Paysafecard 
