@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016 CardGate B.V.
+ * Copyright (c) 2018 CardGate B.V.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,6 @@ namespace cardgate\api\resource {
 		/**
 		 * This method can be used to create a new consumer.
 		 * @return \cardgate\api\Consumer
-		 * @throws Exception
 		 * @access public
 		 * @api
 		 */

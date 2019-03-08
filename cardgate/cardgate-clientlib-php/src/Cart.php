@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016 CardGate B.V.
+ * Copyright (c) 2018 CardGate B.V.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,13 +41,13 @@ namespace cardgate\api {
 
 		/**
 		 * Add a cart item to the cart.
-		 * @param integer $iType_ The cart item type.
+		 * @param int $iType_ The cart item type.
 		 * @param string $sSKU_ The SKU of the cart item.
 		 * @param string $sName_ The name of the cart item (productname).
 		 * @param string $iPrice_ The price of the cart item.
 		 * @param string $sLink_ An optional link to the product.
 		 * @return Item Returns the item that was added.
-		 * @throws Exception
+		 * @throws Exception|\ReflectionException
 		 * @access public
 		 * @api
 		 */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016 CardGate B.V.
+ * Copyright (c) 2018 CardGate B.V.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,9 +34,9 @@ namespace cardgate\api\resource {
 
 		/**
 		 * This method can be used to receive a {@link \cardgate\api\Method} instance.
-		 * @param String $sId_ Method id to receive method instance for.
+		 * @param string $sId_ Method id to receive method instance for.
 		 * @return \cardgate\api\Method
-		 * @throws Exception
+		 * @throws \cardgate\api\Exception|\ReflectionException
 		 * @access public
 		 * @api
 		 */
@@ -46,15 +46,15 @@ namespace cardgate\api\resource {
 
 		/**
 		 * This method can be used to retrieve a list of all available payment methods for a site.
-		 * @param Integer $iSiteId_ The site to retrieve payment methods for.
-		 * @return Array
-		 * @throws Exception
+		 * @param int $iSiteId_ The site to retrieve payment methods for.
+		 * @return array
+		 * @throws \cardgate\api\Exception|\ReflectionException
 		 * @access public
-		 * @pai
+		 * @api
 		 */
 		public function all( $iSiteId_ ) {
 			if ( ! is_integer( $iSiteId_ ) ) {
-				throw new Exception( 'Methods.SiteId.Invalid', 'invalid site id: ' . $iSiteId_ );
+				throw new \cardgate\api\Exception( 'Methods.SiteId.Invalid', 'invalid site id: ' . $iSiteId_ );
 			}
 
 			$sResource = "options/{$iSiteId_}/";
@@ -62,16 +62,17 @@ namespace cardgate\api\resource {
 			$aResult = $this->_oClient->doRequest( $sResource, NULL, 'GET' );
 
 			if ( empty( $aResult['options'] ) ) {
-				throw new \cardgate\api\Exception( 'Method.Issuers.Invalid', 'invalid issuer data returned' );
+				throw new \cardgate\api\Exception( 'Method.Options.Invalid', 'unexpected result: ' . $this->_oClient->getLastResult() . $this->_oClient->getDebugInfo( TRUE, FALSE )	);
 			}
 
 			$aMethods = [];
 			foreach( $aResult['options'] as $aOption ) {
-				if ( in_array( $aOption['id'], ( new \ReflectionClass( '\cardgate\api\Method' ) )->getConstants() ) ) {
+				try {
 					$aMethods[] = new \cardgate\api\Method( $this->_oClient, $aOption['id'], $aOption['name'] );
+				} catch ( \cardgate\api\Exception $oException_ ) {
+					trigger_error( $oException_->getMessage() . '. Please update this SDK to the latest version.', E_USER_WARNING );
 				}
 			}
-
 			return $aMethods;
 		}
 

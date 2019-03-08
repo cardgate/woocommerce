@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
- * Version: 3.1.10
+ * Version: 3.1.11
  * Requires at least: 4.4
  * Author: CardGate
  * Author URI: http://cardgate.com
@@ -25,52 +25,20 @@ class cardgate {
         
         $this->current_gateway_title = '';
         $this->current_gateway_extra_charges = '';
-        add_action('admin_head', array(
-            $this,
-            'add_cgform_fields'
-        ));
-        add_action('woocommerce_cart_calculate_fees', array(
-            $this,
-            'calculate_totals'
-        ), 10, 1);
-        add_action('wp_enqueue_scripts', array(
-            $this,
-            'load_cg_script'
-        ));
+        add_action('admin_head', array($this,'add_cgform_fields'));
+        add_action('woocommerce_cart_calculate_fees', array($this,'calculate_totals'), 10, 1);
+        add_action('wp_enqueue_scripts', array($this,'load_cg_script'));
+        add_action('admin_menu', array(&$this,'CGPAdminMenu'));
+        add_action('init', array(&$this,'cardgate_callback'), 20);
         
-        add_action('admin_menu', array(
-            &$this,
-            'CGPAdminMenu'
-        ));
-        add_action('init', array(
-            &$this,
-            'cardgate_callback'
-        ), 20);
-        
-        register_activation_hook(__FILE__, array(
-            &$this,
-            'cardgate_install'
-        )); // hook for install
-        register_deactivation_hook(__FILE__, array(
-            &$this,
-            'cardgate_uninstall'
-        )); // hook for uninstall
+        register_activation_hook(__FILE__, array(&$this,'cardgate_install')); // hook for install
+        register_deactivation_hook(__FILE__, array(&$this,'cardgate_uninstall')); // hook for uninstall
         update_option('cardgate_version', $this->plugin_get_version());
-        add_action('plugins_loaded', array(
-            &$this,
-            'initiate_payment_classes'
-        ));
+        add_action('plugins_loaded', array(&$this,'initiate_payment_classes'));
         update_option('is_callback_status_change', false);
-        
-        add_action('woocommerce_cancelled_order', array(
-            &$this,
-            'capture_payment_failed'
-        ));
+        add_action('woocommerce_cancelled_order', array(&$this,'capture_payment_failed'));
         if (! $this->cardgate_settings())
-            add_action('admin_notices', array(
-                &$this,
-                'my_error_notice'
-            ));
+            add_action('admin_notices', array(&$this,'my_error_notice'));
     }
 
     // ////////////////////////////////////////////////
@@ -209,7 +177,7 @@ class cardgate {
         load_plugin_textdomain('cardgate', false, plugin_basename(dirname(__FILE__)) . '/i18n/languages');
     }
 
-    // //////////////////////////////////////////////
+    // /d/////////////////////////////////////////////
     
     /**
      * Configuration page
@@ -218,6 +186,7 @@ class cardgate {
         global $wpdb;
         
         $icon_file = plugins_url('images/cardgate.png', __FILE__);
+      
         $message = '';
         
         if (isset($_POST['Submit'])) {
@@ -231,6 +200,10 @@ class cardgate {
                 update_option('cgp_hashkey', $_POST['cgp_hashkey']);
                 update_option('cgp_merchant_id', $_POST['cgp_merchant_id']);
                 update_option('cgp_merchant_api_key', $_POST['cgp_merchant_api_key']);
+                update_option('cgp_checkoutdisplay', $_POST['cgp_checkoutdisplay']);
+               
+                //This wil refresh the bank issuer cache
+                update_option('IssuerRefresh', 0, true);
                 
                 $bIsTest = ($_POST['cgp_mode'] == 1 ? TRUE : FALSE);
                 $iMerchantId = (int) $_POST['cgp_merchant_id'];
@@ -242,7 +215,8 @@ class cardgate {
                 $oMethod = $aMethods[0];
                 
                 if (! is_object($oMethod)) {
-                    $message = __('The settings are not correct for the Mode you chose.<br>For instructions on how to obtain the correct values, please consult our plugin manual at ', 'cardgate') . '<a href="https://www.cardgate.com/plugins/">CardGate</a>';
+                    $message = sprintf('%s<br>%s'
+                        ,__('The settings are not correct for the Mode you chose.','cardgate'),__('See the instructions above. ', 'cardgate'));
                 }
                 $aMethods = $oMethod = null;
             }
@@ -306,8 +280,20 @@ class cardgate {
 						<td><input type="text" style="width:600px;" id="cgp_merchant_api_key" name="cgp_merchant_api_key" value="' . get_option('cgp_merchant_api_key') . '"/>
 						</td>
 					</tr>
+                    <tr>
+						<th scope="row">
+						<label for="cgp_checkoutdisplay">' . __('Checkout display', 'cardgate') . '</label>
+						</th>
+						<td>
+								<select style="width:140px;" id="cgp_checkoutdisplay" name="cgp_checkoutdisplay">
+									<option value="withoutlogo"' . (get_option('cgp_checkoutdisplay') == 'withoutlogo' ? ('selected="selected"') : '') . '>'.__('Without Logo','cardgate').'</option>
+									<option value="withlogo"' . (get_option('cgp_checkoutdisplay') == 'withlogo' ? ('selected="selected"') : '') . '>'.__('With Logo','cardgate').'</option>
+								</select>
+						</td>
+					</tr>
 					<tr>
-						<td colspan="2">' . __('<b>Use the Settings button</b> in <a href="https://my.cardgate.com/">My CardGate</a> to set all these values, as explained in the <a href="https://github.com/cardgate/woocommerce/blob/master/README.md" target="_blank">installation instructions</a> of this plugin.', 'cardgate') . '</td>
+						<td colspan="2">' . sprintf('%s <b>%s</b> %s <a href="https://my.cardgate.com/">%s </a> &nbsp %s <a href="https://github.com/cardgate/woocommerce/blob/master/%s" target="_blank"> %s</a> %s.'
+						    , __('Use the ','cardgate'),__('Settings button', 'cardgate'), __('in your','cardgate'), __('My CardGate','cardgate'), __('to set these values, as explained in the','cardgate'),__('README.md','cardgate'), __('installation instructions','cardgate'), __('of this plugin','cardgate')).'</td>
 					</tr>
 					<tr>
 						<td colspan="2">' . __('These settings apply to all CardGate payment methods used in the WooCommerce plugin.', 'cardgate') . '</td>
@@ -670,24 +656,25 @@ class cardgate {
     }
 
     function initiate_payment_classes() {
-        add_filter('woocommerce_payment_gateways', array(
-            $this,
-            'woocommerce_cardgate_add_gateways'
-        ));
+        add_filter('woocommerce_payment_gateways', array( $this, 'woocommerce_cardgate_add_gateways'));
     }
 
     function woocommerce_cardgate_add_gateways($methods) {
         $methods[] = 'WC_CardgateAfterpay';
         $methods[] = 'WC_CardgateBancontact';
         $methods[] = 'WC_CardgateBanktransfer';
+        $methods[] = 'WC_CardgateBillink';
         $methods[] = 'WC_CardgateBitcoin';
         $methods[] = 'WC_CardgateCreditcard';
         $methods[] = 'WC_CardgateDirectDebit';
+        $methods[] = 'WC_CardgateGiftcard';
         $methods[] = 'WC_CardgateGiropay';
         $methods[] = 'WC_CardgateIdeal';
+        $methods[] = 'WC_CardgateIdealqr';
         $methods[] = 'WC_CardgateKlarna';
         $methods[] = 'WC_CardgatePayPal';
         $methods[] = 'WC_CardgatePaysafecard';
+        $methods[] = 'WC_CardgatePaysafecash';
         $methods[] = 'WC_CardgatePrzelewy24';
         $methods[] = 'WC_CardgateSofortbanking';
         
@@ -790,7 +777,7 @@ class cardgate {
                     $t1 = $extra_charges;
                 }
                 
-                $this->current_gateway_title = $current_gateway->title;
+                $this->current_gateway_title = $current_gateway->settings['title'];
                 $this->current_gateway_extra_charges = $extra_charges;
                 $this->current_gateway_extra_charges_type_value = $extra_charges_type_value;
                 
@@ -839,7 +826,8 @@ class cardgate {
         ?>
 <div class="error notice">
 	<p>
-		<b>CardGate: </b> <?php echo  __('<b>Use the Settings button</b> in <a href="https://my.cardgate.com/">My CardGate</a> to set all these values, as explained in the <a href="https://github.com/cardgate/woocommerce/blob/master/README.md" target="_blank">installation instructions</a> of this plugin.', 'cardgate' ); ?></p>
+		<b>CardGate: </b> <?php sprintf('%s <b>%s</b> %s <a href="https://my.cardgate.com/">%s </a> &nbsp %s <a href="https://github.com/cardgate/woocommerce/blob/master/%s" target="_blank"> %s</a> %s.'
+						    , __('Use the ','cardgate'),__('Settings button', 'cardgate'), __('in your','cardgate'), __('My CardGate','cardgate'), __('to set these values, as explained in the','cardgate'),__('README.md','cardgate'), __('installation instructions','cardgate'), __('of this plugin','cardgate')) ?></p>
 </div>
 <?php
     }
@@ -870,15 +858,7 @@ if (function_exists('spl_autoload_register')) :
             require_once $file;
         }
     }
-    
     spl_autoload_register('cardgate_autoload');
-
-
-
-
-
-
-
 endif;
 
 ?>

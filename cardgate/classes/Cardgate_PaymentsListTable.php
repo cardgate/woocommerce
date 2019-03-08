@@ -295,7 +295,7 @@ class Cardgate_PaymentsListTable extends WP_List_Table {
             );
 
         $html_total_pages = sprintf( "<span class='total-pages'>%s</span>", number_format_i18n( $total_pages ) );
-        $page_links[] = '<span class="paging-input">' . sprintf( __( '%1$s of %2$s', 'cardgate' ), $html_current_page, $html_total_pages ) . '</span>';
+        $page_links[] = '<span class="paging-input">' .$html_current_page.' '. __('of', 'cardgate').' '.$html_total_pages . '</span>';
 
         $page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>", 'next-page' . $disable_last, esc_attr__( 'Go to the next page' ), esc_url( add_query_arg( 'paged', min( $total_pages, $current + 1 ), $current_url ) ), '&rsaquo;'
         );

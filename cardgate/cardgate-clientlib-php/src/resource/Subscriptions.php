@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016 CardGate B.V.
+ * Copyright (c) 2018 CardGate B.V.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,10 +34,10 @@ namespace cardgate\api\resource {
 
 		/**
 		 * This method can be used to retrieve subscription details.
-		 * @param String $sSubscriptionId_ The subscription identifier.
+		 * @param string $sSubscriptionId_ The subscription identifier.
 		 * @param array $aDetails_ Array that gets filled with additional subscription details.
 		 * @return \cardgate\api\Subscription
-		 * @throws Exception
+		 * @throws \cardgate\api\Exception
 		 * @access public
 		 * @api
 		 */
@@ -72,19 +72,37 @@ namespace cardgate\api\resource {
 			if ( ! empty( $aResult['subscription']['reference'] ) ) {
 				$oSubscription->setReference( $aResult['subscription']['reference'] );
 			}
+			if ( ! empty( $aResult['subscription']['start_date'] ) ) {
+				$oSubscription->setStartDate( $aResult['subscription']['start_date'] );
+			}
+			if ( ! empty( $aResult['subscription']['end_date'] ) ) {
+				$oSubscription->setEndDate( $aResult['subscription']['end_date'] );
+			}
+			// TODO: map other subscription fields? method_id can't be used in client::Method currently...
+			/*
+			if ( ! empty( $aResult['subscription']['code'] ) ) {
+				$oSubscription->setCode( $aResult['subscription']['code'] );
+			}
+			if ( ! empty( $aResult['subscription']['payment_type_id'] ) ) {
+				$oSubscription->setPaymentMethod( $aResult['subscription']['payment_type_id'] );
+			}
+			if ( ! empty( $aResult['subscription']['last_payment_date'] ) ) {
+				$oSubscription->setPaymentMethod( $aResult['subscription']['last_payment_date'] );
+			}
+			*/
 
 			return $oSubscription;
 		}
 
 		/**
 		 * This method can be used to create a new subscription.
-		 * @param Integer $iSiteId_ Site id to create the subscription for.
-		 * @param Integer $iPeriod_ The period length of the subscription.
-		 * @param String $sPeriodType_ The period type of the subscription (e.g. day, week, month, year).
-		 * @param Integer $iPeriodAmount_ The period amount of the subscription in cents.
-		 * @param String $sCurrency_ Currency (ISO 4217)
+		 * @param int $iSiteId_ Site id to create the subscription for.
+		 * @param int $iPeriod_ The period length of the subscription.
+		 * @param string $sPeriodType_ The period type of the subscription (e.g. day, week, month, year).
+		 * @param int $iPeriodAmount_ The period amount of the subscription in cents.
+		 * @param string $sCurrency_ Currency (ISO 4217)
 		 * @return \cardgate\api\Subscription
-		 * @throws Exception
+		 * @throws \cardgate\api\Exception
 		 * @access public
 		 * @api
 		 */

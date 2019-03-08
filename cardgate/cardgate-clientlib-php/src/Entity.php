@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016 CardGate B.V.
+ * Copyright (c) 2018 CardGate B.V.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@ namespace cardgate\api {
 		 * @ignore
 		 * @internal To make the data in an Entity available through magic functions (setName, getAmount, unsetName,
 		 * hasCart) populate the _aFields property below. To make autocompletion work in Zend, use the @method phpdoc
-		 * directove like this: @method null setId( int $iId ).
+		 * directive like this: @method null setId( int $iId ).
 		 * Example: [ 'MerchantId' => 'merchant_id', 'Name' => 'name' ]
 		 */
 		static protected $_aFields = [];
@@ -52,20 +52,23 @@ namespace cardgate\api {
 		 * @param string $sPrefix_ Optionally prefix all the data entries.
 		 * @return array Returns an array with the data in the entity.
 		 */
-		public function getData( $sPrefix_ = FALSE ) {
-			$aResult = [];
-			foreach( $this->_aData as $sKey => $mValue ) {
-				if ( is_string( $sPrefix_ ) ) {
-					$sKey = $sPrefix_ . $sKey;
+		public function getData( $sPrefix_ = NULL ) {
+			if ( is_string( $sPrefix_ ) ) {
+				$aResult = [];
+				foreach( $this->_aData as $sKey => $mValue ) {
+					$aResult[$sPrefix_ . $sKey] = $mValue;
 				}
-				$aResult[$sKey] = $mValue;
+				return $aResult;
+			} else {
+				return $this->_aData;
 			}
-			return $aResult;
 		}
 
 		/**
 		 * @ignore
 		 * @internal The __call method translates get-, set-, unset- and has-methods to their configured fields.
+		 * @return $this|mixed|bool Return $this on set and unset, mixed on get and bool on has
+		 * @throws Exception|\ReflectionException
 		 */
 		public function __call( $sMethod_, $aArgs_ ) {
 			$sClassName = ( new \ReflectionClass( $this ) )->getShortName();

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2016 CardGate B.V.
+ * Copyright (c) 2018 CardGate B.V.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,10 +34,10 @@ namespace cardgate\api\resource {
 
 		/**
 		 * This method can be used to retrieve transaction details.
-		 * @param String $sTransactionId_ The transaction identifier.
-		 * @param array $aDetails_ Array that gets filled with additional transaction details.
+		 * @param string $sTransactionId_ The transaction identifier.
+		 * @param array $aDetails_ array that gets filled with additional transaction details.
 		 * @return \cardgate\api\Transaction
-		 * @throws Exception
+		 * @throws \cardgate\api\Exception
 		 * @access public
 		 * @api
 		 */
@@ -51,7 +51,7 @@ namespace cardgate\api\resource {
 			$aResult = $this->_oClient->doRequest( $sResource, NULL, 'GET' );
 
 			if ( empty( $aResult['transaction'] ) ) {
-				throw new \cardgate\api\Exception( 'Transaction.Details.Invalid', 'invalid transaction data returned' );
+				throw new \cardgate\api\Exception( 'Transaction.Details.Invalid', 'invalid transaction data returned' . $this->_oClient->getDebugInfo() );
 			}
 
 			if ( ! is_null( $aDetails_ ) ) {
@@ -60,8 +60,8 @@ namespace cardgate\api\resource {
 
 			$oTransaction = new \cardgate\api\Transaction(
 				$this->_oClient,
-				(int)$aResult['transaction']['site_id'],
-				(int)$aResult['transaction']['amount'],
+				(int) $aResult['transaction']['site_id'],
+				(int) $aResult['transaction']['amount'],
 				$aResult['transaction']['currency_id']
 			);
 			$oTransaction->setId( $aResult['transaction']['id'] );
@@ -80,9 +80,9 @@ namespace cardgate\api\resource {
 
 		/**
 		 * This method can be used to retrieve a transaction status.
-		 * @param String $sTransactionId_ The transaction identifier.
+		 * @param string $sTransactionId_ The transaction identifier.
 		 * @return string
-		 * @throws Exception
+		 * @throws \cardgate\api\Exception
 		 * @access public
 		 * @api
 		 */
@@ -99,7 +99,7 @@ namespace cardgate\api\resource {
 				empty( $aResult['status'] )
 				|| ! is_string( $aResult['status'] )
 			) {
-				throw new \cardgate\api\Exception( 'Transaction.Status.Invalid', 'invalid transaction status returned' );
+				throw new \cardgate\api\Exception( 'Transaction.Status.Invalid', 'invalid transaction status returned' . $this->_oClient->getDebugInfo() );
 			}
 
 			return $aResult['status'];
@@ -107,11 +107,11 @@ namespace cardgate\api\resource {
 
 		/**
 		 * This method can be used to create a new transaction.
-		 * @param Integer $iSiteId_ Site id to create transaction for.
-		 * @param Integer $iAmount_ The amount of the transaction in cents.
-		 * @param String $sCurrency_ Currency (ISO 4217)
+		 * @param int $iSiteId_ Site id to create transaction for.
+		 * @param int $iAmount_ The amount of the transaction in cents.
+		 * @param string $sCurrency_ Currency (ISO 4217)
 		 * @return \cardgate\api\Transaction
-		 * @throws Exception
+		 * @throws \cardgate\api\Exception
 		 * @access public
 		 * @api
 		 */
@@ -121,11 +121,11 @@ namespace cardgate\api\resource {
 
 		/**
 		 * This method can be used to verify a callback for a transaction.
-		 * @param Array $aData_ The callback data (usually $_GET) to use for verification.
-		 * @param String $sSiteKey_ The site key used to verify hash. Leave empty to check hash with the
+		 * @param array $aData_ The callback data (usually $_GET) to use for verification.
+		 * @param string $sSiteKey_ The site key used to verify hash. Leave empty to check hash with the
 		 * use of the merchant key only (otherwise both are checked).
-		 * @return Boolean Returns TRUE if the callback is valid or FALSE if not.
-		 * @throws Exception
+		 * @return bool Returns TRUE if the callback is valid or FALSE if not.
+		 * @throws \cardgate\api\Exception
 		 * @access public
 		 * @api
 		 */
