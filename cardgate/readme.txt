@@ -16,17 +16,21 @@ This plug-in contains the following payment methods from CardGate for WooCommerc
 
 <ul>
 <li>Afterpay</li>
+<li>Bancontact</li>
 <li>Banktransfer</li>
 <li>Billink</li>
 <li>Bitcoin</li>
 <li>Creditcard</li>
 <li>DirectDebit</li>
+<li>Gift Card</li>
 <li>Giropay</li>
 <li>iDEAL</li>
+<li>iDEAL QR</li>
 <li>Klarna</li>
 <li>MisterCash</li>
 <li>PayPal</li>
 <li>Paysafecard</li>
+<li>Paysafecash</li>
 <li>Przelewy24</li>
 <li>Sofortbanking</li>
 </ul>
@@ -63,7 +67,8 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 == Changelog ==
 
 = 3.1.11 =
-* New payment method: Billink 
+* New payment methods: Billink, Gift Card, Paysafecash
+* Cache for Bank issuers. 
 
 = 3.1.10 =
 * New payment method: Paysafecard 
