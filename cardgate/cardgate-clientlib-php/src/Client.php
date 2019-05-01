@@ -297,7 +297,7 @@ namespace cardgate\api {
 		public function setIp( $sIp_ ) {
 			if (
 				! is_string( $sIp_ )
-				|| FALSE === filter_var( $sIp_, FILTER_VALIDATE_IP ) // NOTE ipv6
+			    || FALSE === filter_var( $sIp_, FILTER_VALIDATE_IP)
 			) {
 				throw new Exception( 'Client.Ip.Invalid', 'invalid IP address: ' . $sIp_ );
 			}

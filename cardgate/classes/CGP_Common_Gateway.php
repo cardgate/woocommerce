@@ -186,6 +186,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             $oCardGate = new cardgate\api\Client((int) $iMerchantId, $sMerchantApiKey, $bIsTest);
             
             $oCardGate->setIp($_SERVER['REMOTE_ADDR']);
+ 
             $oCardGate->setLanguage($sLanguage);
             $oCardGate->version()->setPlatformName('Woocommerce');
             $oCardGate->version()->setPlatformVersion($sVersion);
