@@ -15,8 +15,8 @@ if (! defined('ABSPATH'))
 class CGP_Common_Gateway extends WC_Payment_Gateway {
 
     var $bankOption;
-
     var $logo;
+    var $bSeperateSalesTax;
 
     // ////////////////////////////////////////////////
     public function __construct() {}
@@ -433,6 +433,10 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
      */
     private function getCartItems($iOrderId) {
         global $woocommerce;
+
+        $sDefaultCountry = get_option( 'woocommerce_default_country' );
+
+        $this->bSeperateSalesTax = (stripos($sDefaultCountry,'US') === false ? false : true);
         
         $nr = 0;
         $iCartItemTotal = 0;
@@ -454,14 +458,14 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
                 $iPrice = round(($oItem->get_total() * 100) / $iQty);
                 $iTax = round(($oItem->get_total_tax() * 100) / $iQty);
                 $iTotal = round($iPrice + $iTax);
-                $iTaxrate = ($iTax > 0 ? round((($oItem->get_total_tax() * 100) / $iQty) / (($oItem->get_total()) / $iQty), 1) : 0);
+                $iTaxrate = $this->get_tax_rate($oProduct);
             } else {
-                
+
                 $aItem = $oItem;
                 $sName = $aItem['name'];
                 $sModel = 'product_' . $aItem['item_meta']['_product_id'][0];
                 $oProduct = $oOrder->get_product_from_item($aItem);
-                $iQty = (int) $aItem['item_meta']['_qty'][0];
+                $iQty = (int)$aItem['item_meta']['_qty'][0];
                 $iPrice = round(($oOrder->get_item_total($aItem, false, false) * 100));
                 $iTax = round(($oOrder->get_item_tax($aItem, false) * 100));
                 $iTotal = round($iPrice + $iTax);
@@ -489,12 +493,12 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
         if (! empty($aShipping_methods) && is_array($aShipping_methods)) {
             foreach ($aShipping_methods as $oShipping) {
                 if (is_object($oShipping)) {
+
                     $sName = $oShipping->get_name();
                     $sModel = $oShipping->get_type();
                     $iPrice = round($oShipping->get_total() * 100);
                     $iTax = round($oShipping->get_total_tax() * 100);
                     $iTotal = round($iPrice + $iTax);
-                    $iTaxrate = ($iTax > 0 ? round(($oShipping->get_total_tax() / $oShipping->get_total()) * 100, 1) : 0);
                 } else {
                     $aShipping = $oShipping;
                     $sName = $aShipping['name'];
@@ -502,8 +506,9 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
                     $iPrice = round($oOrder->get_total_shipping() * 100);
                     $iTax = round($oOrder->get_shipping_tax() * 100);
                     $iTotal = round($iPrice + $iTax);
-                    $iTaxrate = ($iTax > 0 ? round(($oOrder->get_shipping_tax() / $oOrder->get_total_shipping()) * 100, 1) : 0);
                 }
+                $iTaxrate = $this->get_shipping_tax_rate($iTotal);
+
                 $nr ++;
                 $items[$nr]['type'] = 'shipping';
                 $items[$nr]['model'] = $sModel;
@@ -517,7 +522,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
                 $iShippingVatTotal = $iTax;
             }
         }
-        
+
         $fpExtraFee = (empty($woocommerce->session->extra_cart_fee) ? 0 : $woocommerce->session->extra_cart_fee);
         $iExtraFee = round($fpExtraFee * 100);
         
@@ -584,6 +589,44 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
         } else {
             return true;
         }
+    }
+
+
+
+    public function get_tax_rate($oProduct){
+        $sDefaultCountry = get_option( 'woocommerce_default_country' );
+        if (stripos($sDefaultCountry,'US') === false){
+            $oTax       = new WC_Tax();
+            $aTempRates = $oTax->get_rates( $oProduct->get_tax_class() );
+            $aVat       = array_shift( $aTempRates );
+            if ( isset( $aVat['rate'] ) ) {
+                $dItemTaxRate = round( $aVat['rate'],2 );
+            } else {
+                $dItemTaxRate = 0;
+            }
+        } else {
+            $dItemTaxRate = 0;
+        }
+
+        return $dItemTaxRate;
+    }
+
+    public function get_shipping_tax_rate($iTotal) {
+
+        if ( $iTotal > 0 && ! $this->bSeperateSalesTax ) {
+            $oTax = new WC_Tax();
+            $aShippingRates     = $oTax->get_shipping_tax_rates();
+            $aVat               = array_shift( $aShippingRates );
+            if ( isset( $aVat['rate'] ) ) {
+                $dShippingTaxRate = round( $aVat['rate'], 2);
+            } else {
+                $dShippingTaxRate = 0;
+            }
+        } else {
+            $dShippingTaxRate = 0;
+        }
+
+        return $dShippingTaxRate;
     }
 
     // ////////////////////////////////////////////////
