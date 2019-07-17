@@ -66,6 +66,12 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 
 == Changelog ==
 
+= 3.1.14 =
+* Check for valid bank issuers
+
+= 3.1.13 =
+* Fix: Text translation
+
 = 3.1.12 =
 * Fix: Missing Bank issuer
 
