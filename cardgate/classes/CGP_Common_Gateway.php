@@ -66,7 +66,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	private function getBankOptions() {
 		$this->checkBankOptions();
 		$aIssuers = get_option( 'sIssuers' );
-
 		return $aIssuers;
 	}
 
@@ -110,8 +109,10 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		foreach ( $aIssuers as $aIssuer ) {
 			$aOptions[ $aIssuer['id'] ] = $aIssuer['name'];
 		}
-
-		update_option( 'sIssuers', $aOptions, true );
+		$bIsValid = array_key_exists('INGBNL2A', $aOptions);
+        if ($bIsValid) {
+	        update_option( 'sIssuers', $aOptions, true );
+        }
 	}
 
 	// //////////////////////////////////////////////
