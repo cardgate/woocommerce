@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
- * Version: 3.1.13
+ * Version: 3.1.14
  * Requires at least: 4.4
  * Author: CardGate
  * Author URI: http://cardgate.com
@@ -424,7 +424,7 @@ class cardgate {
         global $woocommerce;
         
         if (! empty($_REQUEST['cgp_sitesetup']) && ! empty($_REQUEST['token'])) {
-            
+
             try {
                 require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
                 $bIsTest = ($_REQUEST['testmode'] == 1 ? true : false);
@@ -826,7 +826,7 @@ class cardgate {
         ?>
 <div class="error notice">
 	<p>
-		<b>CardGate: </b> <?php sprintf('%s <b>%s</b> %s <a href="https://my.cardgate.com/">%s </a> &nbsp %s <a href="https://github.com/cardgate/woocommerce/blob/master/%s" target="_blank"> %s</a> %s.'
+		<b>CardGate: </b> <?php echo sprintf('%s <b>%s</b> %s <a href="https://my.cardgate.com/">%s </a> &nbsp %s <a href="https://github.com/cardgate/woocommerce/blob/master/%s" target="_blank"> %s</a> %s.'
 						    , __('Use the ','cardgate'),__('Settings button', 'cardgate'), __('in your','cardgate'), __('My CardGate','cardgate'), __('to set these values, as explained in the','cardgate'),__('README.md','cardgate'), __('installation instructions','cardgate'), __('of this plugin','cardgate')) ?></p>
 </div>
 <?php
