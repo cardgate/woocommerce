@@ -155,7 +155,7 @@ namespace cardgate\api {
 		 */
 		public function __debugInfo() {
 			return [
-				'Version'       => $this->_oVersion,
+				'Version'     => $this->_oVersion,
 				'Testmode'    => $this->_bTestmode,
 				'DebugLevel'  => $this->_iDebugLevel,
 				'iMerchantId' => $this->_iMerchantId,
