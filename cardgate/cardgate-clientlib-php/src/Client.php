@@ -35,7 +35,7 @@ namespace cardgate\api {
 		/**
 		 * Client version.
 		 */
-		const CLIENT_VERSION = "1.1.10";
+		const CLIENT_VERSION = "1.1.12";
 
 		/**
 		 * Url to use for production.
@@ -155,7 +155,7 @@ namespace cardgate\api {
 		 */
 		public function __debugInfo() {
 			return [
-				'Version'     => $this->_oVersion,
+				'Version'       => $this->_oVersion,
 				'Testmode'    => $this->_bTestmode,
 				'DebugLevel'  => $this->_iDebugLevel,
 				'iMerchantId' => $this->_iMerchantId,
@@ -297,7 +297,7 @@ namespace cardgate\api {
 		public function setIp( $sIp_ ) {
 			if (
 				! is_string( $sIp_ )
-			    || FALSE === filter_var( $sIp_, FILTER_VALIDATE_IP)
+				|| FALSE === filter_var( $sIp_, FILTER_VALIDATE_IP ) // NOTE ipv6
 			) {
 				throw new Exception( 'Client.Ip.Invalid', 'invalid IP address: ' . $sIp_ );
 			}
