@@ -1,0 +1,15 @@
+{
+  "name": "cardgate/woocommerce",
+  "type": "library",
+  "description": "CardGate payment processing module for WooCommerce",
+  "keywords": [
+    "woocommerce",
+    "cardgate",
+    "payment"
+  ],
+  "homepage": "https://www.cardgate.com",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": { "Cardgate\\woocommerce\\" : "" }
+  }
+}
