@@ -1,2 +1,12 @@
-
-git.php
+*
+!.gitignore
+!cardgate
+!cardgate/tests/
+!cardgate/tests/bootstrap.php
+!cardgate/tests/phpunit.xml
+!README.md
+!README_DE.md
+!README_NL.md
+!composer.json
+!.travis.yml
+!phpunit.xml.dist
