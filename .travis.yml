@@ -23,4 +23,4 @@ install:
 
 script:
   - composer validate --strict
-  - vendor/bin/phpunit -c tests/phpunit.xml
+  - vendor/bin/phpunit -c cardgate/tests/phpunit.xml
