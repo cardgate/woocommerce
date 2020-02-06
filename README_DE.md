@@ -2,6 +2,8 @@ f![CardGate](https://cdn.curopayments.net/thumb/200/logos/cardgate.png)
 
 # CardGate Modul für WooCommerce
 
+[![Build Status](https://travis-ci.org/cardgate/woocommerce.svg?branch=master)](https://travis-ci.org/cardgate/woocommerce)
+
 ## Support
 
 Dieses Plug-in ist geeignet für WooCommerce Version **3.x**.

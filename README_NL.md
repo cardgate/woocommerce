@@ -2,6 +2,8 @@
 
 # CardGate module voor WooCommerce
 
+[![Build Status](https://travis-ci.org/cardgate/woocommerce.svg?branch=master)](https://travis-ci.org/cardgate/woocommerce)
+
 ## Support
 
 Deze plugin is geschikt voor WooCommerce versie  **3.x**.
