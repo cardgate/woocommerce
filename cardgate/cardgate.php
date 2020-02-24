@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
- * Version: 3.1.15
+ * Version: 3.1.16
  * Requires at least: 4.4
  * Author: CardGate
  * Author URI: http://cardgate.com
@@ -40,8 +40,6 @@ class cardgate {
         if (! $this->cardgate_settings())
             add_action('admin_notices', array(&$this,'my_error_notice'));
     }
-
-    // ////////////////////////////////////////////////
     
     /**
      * Install plug-in
@@ -427,15 +425,30 @@ class cardgate {
 
             try {
                 require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
+	            $sVersion = ( $this->get_woocommerce_version() == '' ? 'unkown' : $this->get_woocommerce_version() );
+	            $sLanguage = substr( get_locale(), 0, 2 );
                 $bIsTest = ($_REQUEST['testmode'] == 1 ? true : false);
-                $aResult = cardgate\api\Client::pullConfig($_REQUEST['token'], $bIsTest);
-                $aConfigData = $aResult['pullconfig']['content'];
-                update_option('cgp_mode', $aConfigData['testmode']);
-                update_option('cgp_siteid', $aConfigData['site_id']);
-                update_option('cgp_hashkey', $aConfigData['site_key']);
-                update_option('cgp_merchant_id', $aConfigData['merchant_id']);
-                update_option('cgp_merchant_api_key', $aConfigData['api_key']);
-                die($aConfigData['merchant'] . '.' . get_option('cgp_siteid') . '.200');
+                $iMerchantId = (int)(get_option('cgp_merchant_id')== false ? 0 : get_option('cgp_merchant_id'));
+                $sMerchantApiKey = (get_option('cgp_merchant_api_key')== false ? 'initconfig' : get_option('cgp_merchant_api_key'));
+	            $oCardGate = new cardgate\api\Client( $iMerchantId, $sMerchantApiKey, $bIsTest );
+	            $oCardGate->setIp( $_SERVER['REMOTE_ADDR'] );
+	            $oCardGate->setLanguage( $sLanguage );
+	            $oCardGate->version()->setPlatformName( 'Woocommerce' );
+	            $oCardGate->version()->setPlatformVersion( $sVersion );
+	            $oCardGate->version()->setPluginName( 'CardGate' );
+	            $oCardGate->version()->setPluginVersion( get_option( 'cardgate_version' ) );
+	            $aResult = $oCardGate->pullConfig($_REQUEST['token']);
+	            if (isset($aResult['success']) && $aResult['success'] == 1){
+		            $aConfigData = $aResult['pullconfig']['content'];
+		            update_option('cgp_mode', $aConfigData['testmode']);
+		            update_option('cgp_siteid', $aConfigData['site_id']);
+		            update_option('cgp_hashkey', $aConfigData['site_key']);
+		            update_option('cgp_merchant_id', $aConfigData['merchant_id']);
+		            update_option('cgp_merchant_api_key', $aConfigData['api_key']);
+		            die ($aConfigData['merchant'] . '.' . get_option('cgp_siteid') . '.200');
+                } else {
+	                die('Token retrieval failed.');
+                }
             } catch (cardgate\api\Exception $oException_) {
                 die(htmlspecialchars($oException_->getMessage()));
             }
