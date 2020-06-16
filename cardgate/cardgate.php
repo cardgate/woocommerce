@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
- * Version: 3.1.16
+ * Version: 3.1.17
  * Requires at least: 4.4
  * Author: CardGate
  * Author URI: http://cardgate.com

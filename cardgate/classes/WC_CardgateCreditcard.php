@@ -23,7 +23,7 @@ class WC_CardgateCreditcard extends CGP_Common_Gateway {
         
         $this->init_form_fields();
         $this->init_settings();
-        $this->title = $this->payment_name;
+        $this->title = (isset($this->settings['title']) ? $this->settings['title'] : $this->payment_name);
         $this->description = $this->settings['description'];
        
         add_filter ( 'woocommerce_gateway_icon', array($this, 'modify_icon'), 20, 2 );
