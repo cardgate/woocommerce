@@ -22,6 +22,14 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 
 	// ////////////////////////////////////////////////
 	public function __construct() {
+		$this->init_form_fields();
+		$this->init_settings();
+		$this->title = (isset($this->settings['title']) && !empty($this->settings['title']) ? $this->settings['title'] : $this->payment_name);
+		$this->description = $this->settings['description'];
+
+		add_filter ( 'woocommerce_gateway_icon', array($this, 'modify_icon'), 20, 2 );
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receiptPage' ) );
 	}
 
 	/**
