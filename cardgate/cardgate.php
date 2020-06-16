@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
- * Version: 3.1.16
+ * Version: 3.1.17
  * Requires at least: 4.4
  * Author: CardGate
  * Author URI: http://cardgate.com
@@ -230,9 +230,9 @@ class cardgate {
         $sHtml = '<div class="wrap">
 				<form name="frmCardgate" action="' . $sAction_url . '" method="post">';
         $sHtml .= wp_nonce_field('action854', 'nonce134');
-        $sHtml .= '
-				<h2>' . '<img src="' . $icon_file . '" />&nbsp;' . __('CardGate Settings', 'cardgate') . '</h2>
-				<b>Version ' . get_option('cardgate_version') . '</b>
+        $sHtml .= '<img style="max-width:100px;" src="' . $icon_file . '" />&nbsp;
+                <b>Version ' . get_option('cardgate_version') . '</b>
+				<h2>'. __('CardGate Settings', 'cardgate') . '</h2>
 				<table class="form-table">
 					<tbody>
 					<tr>
@@ -326,8 +326,9 @@ class cardgate {
         $wp_list_table->prepare_items();
         ?>
 <div class="wrap">
-	<h2>
-                <?php '<img src="' . $icon_file . '" />&nbsp;' . __('CardGate Payments','cardgate') ?>
+            <div><?php echo '<img style="max-width:100px;" src="' . $icon_file . '" />&nbsp;' ?></div>
+	        <h2>
+                <?php echo __('CardGate Payments','cardgate') ?>
             </h2>
 
             <?php $wp_list_table->views(); ?>
