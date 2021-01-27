@@ -5,7 +5,7 @@ Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, MisterCash, SofortBanki
 Requires at least: 4.2
 Tested up to: 5.6
 WC requires at least: 2.1.0
-WC tested up to: 4.8.0
+WC tested up to: 4.9.0
 Stable tag: 3.1.17
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
