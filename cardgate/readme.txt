@@ -3,10 +3,8 @@ Plugin Name: CardGate Payments for WooCommerce
 Contributors: cardgate
 Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, MisterCash, SofortBanking, OverBoeking, PayPal, Giropay, DirectDebit, Webmoney
 Requires at least: 4.2
-Tested up to: 5.5
-WC requires at least: 2.1.0
-WC tested up to: 4.6.1
-Stable tag: 3.1.17
+Tested up to: 5.6
+Stable tag: 3.1.18
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
