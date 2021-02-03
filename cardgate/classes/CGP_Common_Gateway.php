@@ -349,7 +349,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 					'redirect' => trim( $sActionUrl )
 				];
 			} else {
-				$sErrorMessage = 'CardGate error: ' . htmlspecialchars( $oException_->getMessage() );
+				$sErrorMessage = 'CardGate error: ' .'no redirect URL';
 				wc_add_notice( $sErrorMessage, 'error' );
 
 				return [

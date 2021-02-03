@@ -4,13 +4,15 @@
  * Plugin Name: CardGate
  * Plugin URI: http://cardgate.com
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
+ * Author: CardGate
+ * Author URI: https://www.cardgate.com
+ * Version: 3.1.18
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
- * Version: 3.1.17
  * Requires at least: 4.4
- * Author: CardGate
- * Author URI: http://cardgate.com
- * License: GPL
+ * WC requires at least: 2.1.0
+ * WC tested up to: 4.9.0
+ * License: GPLv3 or later
  */
 class cardgate {
 
