@@ -497,7 +497,9 @@ class cardgate {
             
             if (($sOrderStatus != 'processing' && $sOrderStatus != 'completed')) {
                 if ($_REQUEST['code'] >= '200' && $_REQUEST['code'] < '300') {
-	                $order->set_transaction_id( $_REQUEST['transaction']);
+                    if (WC()->version >='3.0.0') {
+	                    $order->set_transaction_id( $_REQUEST['transaction'] );
+                    }
                     $order->payment_complete();
                 }
                 // process order
