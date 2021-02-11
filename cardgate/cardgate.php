@@ -14,6 +14,9 @@
  * WC tested up to: 4.9.0
  * License: GPLv3 or later
  */
+
+require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
+
 class cardgate {
 
     protected $_Lang = NULL;
@@ -24,7 +27,6 @@ class cardgate {
     function __construct() {
         // Set up localisation.
         $this->load_plugin_textdomain();
-        
         $this->current_gateway_title = '';
         $this->current_gateway_extra_charges = '';
         add_action('admin_head', array($this,'add_cgform_fields'));
@@ -394,11 +396,9 @@ class cardgate {
      * Return Boolean
      */
     private function hashCheck($data, $hashKey, $testMode) {
-        require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
+
         try {
-            
-            require 'cardgate-clientlib-php/init.php';
-            
+
             $iMerchantId = (int) (get_option('cgp_merchant_id') ? get_option('cgp_merchant_id') : 0);
             $sMerchantApiKey = (get_option('cgp_merchant_api_key') ? get_option('cgp_merchant_api_key') : 0);
             
@@ -427,7 +427,7 @@ class cardgate {
         if (! empty($_REQUEST['cgp_sitesetup']) && ! empty($_REQUEST['token'])) {
 
             try {
-                require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
+
 	            $sVersion = ( $this->get_woocommerce_version() == '' ? 'unkown' : $this->get_woocommerce_version() );
 	            $sLanguage = substr( get_locale(), 0, 2 );
                 $bIsTest = ($_REQUEST['testmode'] == 1 ? true : false);
@@ -497,6 +497,7 @@ class cardgate {
             
             if (($sOrderStatus != 'processing' && $sOrderStatus != 'completed')) {
                 if ($_REQUEST['code'] >= '200' && $_REQUEST['code'] < '300') {
+	                $order->set_transaction_id( $_REQUEST['transaction']);
                     $order->payment_complete();
                 }
                 // process order
@@ -824,8 +825,7 @@ class cardgate {
 
     private function get_methods($iSiteId, $iMerchantId, $sMerchantApiKey, $bIsTest) {
         try {
-            require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
-            
+
             $oCardGate = new cardgate\api\Client($iMerchantId, $sMerchantApiKey, $bIsTest);
             $oCardGate->setIp($_SERVER['REMOTE_ADDR']);
             

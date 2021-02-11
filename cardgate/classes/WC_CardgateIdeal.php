@@ -17,6 +17,7 @@ class WC_CardgateIdeal extends CGP_Common_Gateway {
     var $payment_name = 'iDEAL';
     var $payment_method = 'ideal';
     var $company = 'CardGate';
+	public $supports = ['products'];
     var $has_fields = true; //extra field for bank data
     
     public function __construct() {
