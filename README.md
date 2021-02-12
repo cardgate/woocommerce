@@ -6,7 +6,7 @@
 
 ## Support
 
-This plugin supports WooCommerce version **3.x** and **4.x**
+This plugin supports WooCommerce version **3.x** to **5.x**
 
 ## Preparation
 

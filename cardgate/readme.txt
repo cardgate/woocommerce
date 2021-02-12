@@ -74,6 +74,9 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 
 == Changelog ==
 
+= 3.1.18 =
+* Edit requirements
+
 = 3.1.17 =
 * Fix: Payment method title
 * new admin logo
