@@ -94,10 +94,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		update_option( 'IssuerRefresh', $iIssuerRefresh, true );
 
 		try {
-
-			require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
-
-			$iMerchantId     = ( get_option( 'cgp_merchant_id' ) ? get_option( 'cgp_merchant_id' ) : 0 );
+		    $iMerchantId     = ( get_option( 'cgp_merchant_id' ) ? get_option( 'cgp_merchant_id' ) : 0 );
 			$sMerchantApiKey = ( get_option( 'cgp_merchant_api_key' ) ? get_option( 'cgp_merchant_api_key' ) : 0 );
 			$bIsTest         = ( get_option( 'cgp_mode' ) == 1 ? true : false );
 
@@ -182,7 +179,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	 */
 	public function process_payment( $iOrderId ) {
 		global $woocommerce;
-		require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
 
 		try {
 
@@ -371,6 +367,61 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	// ////////////////////////////////////////////////
 
 	/**
+	 * Process refund.
+	 *
+	 * If the gateway declares 'refunds' support, this will allow it to refund.
+	 * a passed in amount.
+	 *
+	 * @param  int        $order_id Order ID.
+	 * @param  float|null $amount Refund amount.
+	 * @param  string     $reason Refund reason.
+	 * @return boolean True or false based on success, or a WP_Error object.
+	 */
+	public function process_refund( $order_id, $amount = null, $reason = '' ) {
+
+		$iMerchantId     = ( get_option( 'cgp_merchant_id' ) ? get_option( 'cgp_merchant_id' ) : 0 );
+		$sMerchantApiKey = ( get_option( 'cgp_merchant_api_key' ) ? get_option( 'cgp_merchant_api_key' ) : 0 );
+		$bIsTest         = ( get_option( 'cgp_mode' ) == 1 ? true : false );
+		$sLanguage       = substr( get_locale(), 0, 2 );
+
+		$sVersion = ( $this->get_woocommerce_version() == '' ? 'unkown' : $this->get_woocommerce_version() );
+
+		$oClient = new cardgate\api\Client( (int) $iMerchantId, $sMerchantApiKey, $bIsTest );
+
+		$oClient->setIp( $_SERVER['REMOTE_ADDR'] );
+		$oClient->setLanguage( $sLanguage );
+		$oClient->version()->setPlatformName( 'Woocommerce' );
+		$oClient->version()->setPlatformVersion( $sVersion );
+		$oClient->version()->setPluginName( 'CardGate' );
+		$oClient->version()->setPluginVersion( get_option( 'cardgate_version' ) );
+
+
+
+		$iSiteId  = (int) get_option( 'cgp_siteid' );
+		$amount   = (int) round( $amount * 100 );
+		$currency = get_woocommerce_currency();
+		$aData = [
+			'amount'		=> $amount,
+			'currency_id'	=> $currency,
+			'description'	=> $reason
+		];
+
+		$order   = wc_get_order($order_id);
+		$sTransactionId = $order->get_transaction_id();
+
+		$sResource = "refund/{$sTransactionId}/";
+
+		$aData = array_filter( $aData ); // remove NULL values
+		$aResult = $oClient->doRequest( $sResource, $aData, 'POST' );
+        if ($aResult['success'] == false){
+	        return new WP_Error ('cardgate', 'Curopayments code: '.$aResult['code'].', '.$aResult['message']);
+        } else {
+	        return true;
+        }
+        return false;
+	}
+
+	/**
 	 * Save the payment data in the database
 	 *
 	 * @param integer $iOrderId
@@ -408,9 +459,14 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 				$payment_id = $result['id'];
 			}
 		}
+		if ( WC()->version < '3.0.0' ) {
+			$order_id = $order->id;
+		} else {
+			$order_id = $order->get_id();
+		}
 
 		$data = [
-			'order_id'         => $order->id,
+			'order_id'         => $order_id,
 			'currency'         => get_woocommerce_currency(),
 			'amount'           => $order->get_total() * 100,
 			'gateway_language' => $this->getLanguage(),

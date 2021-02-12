@@ -6,7 +6,7 @@ f![CardGate](https://cdn.curopayments.net/thumb/200/logos/cardgate.png)
 
 ## Support
 
-Dieses Plug-in ist geeignet für WooCommerce Version **3.x** und **4.x**
+Dieses Plug-in ist geeignet für WooCommerce Version **3.x** - **5.x**
 
 ## Vorbereitung
 
