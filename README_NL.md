@@ -6,7 +6,7 @@
 
 ## Support
 
-Deze plugin is geschikt voor WooCommerce versie  **3.x** tot **5.x**
+Deze plugin is geschikt voor WooCommerce versie  **3.x** - **5.x**
 
 ## Voorbereiding
 
