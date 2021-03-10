@@ -17,6 +17,7 @@ class WC_CardgateBillink extends CGP_Common_Gateway {
     var $payment_name = 'Billink';
     var $payment_method = 'billink';
     var $company = 'CardGate';
+	public $supports = ['products', 'refunds'];
     var $has_fields = false; //extra field for bank data
     
     public function __construct() {

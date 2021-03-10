@@ -17,6 +17,7 @@ class WC_CardgateGiftcard extends CGP_Common_Gateway {
     var $payment_name = 'Gift Card';
     var $payment_method = 'giftcard';
     var $company = 'CardGate';
+	public $supports = ['products', 'refunds'];
     var $has_fields = false; //extra field for bank data
     
     public function __construct() {

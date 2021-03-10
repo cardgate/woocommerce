@@ -17,6 +17,7 @@ class WC_CardgateCreditcard extends CGP_Common_Gateway {
     var $payment_name = 'Creditcard';
     var $payment_method = 'creditcard';
     var $company = 'CardGate';
+	public $supports = ['products', 'refunds'];
     var $has_fields = false; //extra field for bank data
     
     public function __construct() {
