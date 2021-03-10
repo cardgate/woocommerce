@@ -17,6 +17,7 @@ class WC_CardgateSofortbanking extends CGP_Common_Gateway {
     var $payment_name = 'Sofortbanking';
     var $payment_method = 'sofortbanking';
     var $company = 'CardGate';
+	public $supports = ['products', 'refunds'];
     var $has_fields = false; //extra field for bank data
   
     public function __construct() {

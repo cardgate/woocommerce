@@ -17,6 +17,7 @@ class WC_CardgateOnlineueberweisen extends CGP_Common_Gateway {
 	var $payment_name = 'OnlineÜberweisen';
 	var $payment_method = 'onlineueberweisen';
 	var $company = 'CardGate';
+	public $supports = ['products', 'refunds'];
 	var $has_fields = false; //extra field for bank data
 
 	public function __construct() {

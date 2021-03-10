@@ -17,6 +17,7 @@ class WC_CardgatePayPal extends CGP_Common_Gateway {
     var $payment_name = 'PayPal';
     var $payment_method = 'paypal';
     var $company = 'CardGate';
+	public $supports = ['products', 'refunds'];
     var $has_fields = false; //extra field for bank data
 
     public function __construct() {
