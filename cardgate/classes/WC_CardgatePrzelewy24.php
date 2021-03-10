@@ -17,6 +17,7 @@ class WC_CardgatePrzelewy24 extends CGP_Common_Gateway {
     var $payment_name = 'Przelewy24';
     var $payment_method = 'przelewy24';
     var $company = 'CardGate';
+	public $supports = ['products', 'refunds'];
     var $has_fields = false; //extra field for bank data
   
     public function __construct() {
