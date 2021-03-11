@@ -416,6 +416,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
         if ($aResult['success'] == false){
 	        return new WP_Error ('cardgate', 'Curopayments code: '.$aResult['code'].', '.$aResult['message']);
         } else {
+	        $order->add_order_note('Curo transaction (' . $aResult['refund']['transaction'] . ') Refund amount = ' . round($amount/100,2) . '.');
 	        return true;
         }
         return false;
