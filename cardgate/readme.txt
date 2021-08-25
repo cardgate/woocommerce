@@ -4,7 +4,7 @@ Contributors: cardgate
 Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, MisterCash, SofortBanking, OverBoeking, PayPal, Giropay, DirectDebit, Webmoney
 Requires at least: 4.2
 Tested up to: 5.7
-Stable tag: 3.1.20
+Stable tag: 3.1.21
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -34,6 +34,7 @@ This plug-in contains the following payment methods from CardGate for WooCommerc
 <li>Paysafecash</li>
 <li>Przelewy24</li>
 <li>Sofortbanking</li>
+<li>SprayPay</li>
 </ul>
 
 == Installation ==
@@ -73,6 +74,9 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 3. Payment settings for a specific CardGate payment method.
 
 == Changelog ==
+
+= 3.1.21 =
+* New payment method: SprayPay
 
 = 3.1.20 =
 * Tested version updates
