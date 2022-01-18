@@ -11,7 +11,7 @@
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
  * WC requires at least: 2.1.0
- * WC tested up to: 5.6.0
+ * WC tested up to: 6.0.0
  * License: GPLv3 or later
  */
 
