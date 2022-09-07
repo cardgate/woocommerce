@@ -19,6 +19,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	var $bankOption;
 	var $logo;
 	var $bSeperateSalesTax;
+    var $instructions;
 
 	// ////////////////////////////////////////////////
 	public function __construct() {
@@ -26,10 +27,12 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		$this->init_settings();
 		$this->title = (isset($this->settings['title']) && !empty($this->settings['title']) ? $this->settings['title'] : $this->payment_name);
 		$this->description = $this->settings['description'];
+        $this->instructions = (!empty($this->settings['instructions']) ? $this->settings['instructions'] : '');
 
 		add_filter ( 'woocommerce_gateway_icon', array($this, 'modify_icon'), 20, 2 );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receiptPage' ) );
+        add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
 	}
 
 	/**
@@ -43,6 +46,15 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$this->generate_bank_html();
 		}
 	}
+
+    /**
+     * Output for the order received page.
+     */
+    public function thankyou_page() {
+        if ( $this->instructions ) {
+            echo wp_kses_post( wpautop( wptexturize( $this->instructions ) ) );
+        }
+    }
 
 	// ////////////////////////////////////////////////
 
@@ -146,7 +158,14 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 				'description' => __( 'Payment method description that the customer will see on your website.', 'cardgate' ),
 				'default'     => __( 'Pay with ', 'cardgate' ) . $this->payment_name,
 				'desc_tip'    => true
-			]
+			],
+            'instructions'       => [
+                'title'       => __( 'Instructions', 'cardgate' ),
+                'type'        => 'textarea',
+                'description' => __( 'Instructions that will be added to the thank you page.', 'cardgate' ),
+                'default'     => __( '', 'cardgate' ),
+                'desc_tip'    => true
+            ]
 		];
 	}
 
@@ -179,7 +198,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	 */
 	public function process_payment( $iOrderId ) {
 		global $woocommerce;
-
 		try {
 
 			$this->savePaymentData( $iOrderId );
@@ -545,8 +563,8 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 				$sName    = $oProduct->get_name();
 				$sModel   = $this->formatSku( $oProduct );
 				$iQty     = $oItem->get_quantity();
-				$iPrice   = round( ( $oItem->get_total() * 100 ) / $iQty );
-				$iTax     = round( ( $oItem->get_total_tax() * 100 ) / $iQty );
+				$iPrice   = round( ( $oItem->get_subtotal() * 100 ) / $iQty );
+				$iTax     = round( ( $oItem->get_subtotal_tax() * 100 ) / $iQty );
 				$iTotal   = round( $iPrice + $iTax );
 				$iTaxrate = $this->get_tax_rate( $oProduct );
 			} else {
@@ -576,7 +594,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		}
 
 		$iShippingTotal    = 0;
-		$iShippingVatTotal = 0;
+		$ishippingTaxTotal = 0;
 
 		$aShipping_methods = $oOrder->get_shipping_methods();
 
@@ -609,7 +627,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 				$items[ $nr ]['vat_amount'] = $iTax;
 
 				$iShippingTotal    = $iPrice;
-				$iShippingVatTotal = $iTax;
+				$ishippingTaxTotal = $iTax;
 			}
 		}
 
@@ -628,7 +646,26 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$items[ $nr ]['vat_amount'] = 0;
 		}
 
-		$iTaxDifference = round( $oOrder->get_total_tax() * 100 ) - $iCartItemTaxTotal - $iShippingVatTotal;
+        $iDiscountTotal = 0;
+        $iDiscountTaxTotal = 0;
+
+        $aOrderData = $oOrder->get_data();
+        if ( $aOrderData['discount_total'] > 0 ) {
+            $iDiscountTaxTotal = round($aOrderData['discount_tax'] * -100);
+            $iDiscountTotal = round($aOrderData['discount_total'] * -100);
+            $iDiscountVat = round($aOrderData['discount_tax'] / $aOrderData['discount_total'] * 100);
+
+            $nr ++;
+            $items[ $nr ]['type']       = 'discount';
+            $items[ $nr ]['model']      = 'discount_total';
+            $items[ $nr ]['name']       = 'Discount';
+            $items[ $nr ]['quantity']   = 1;
+            $items[ $nr ]['price_wt']   = $iDiscountTotal;
+            $items[ $nr ]['vat']        = $iDiscountVat;
+            $items[ $nr ]['vat_amount'] = $iDiscountTaxTotal;
+        }
+
+		$iTaxDifference = round( $oOrder->get_total_tax() * 100 ) - $iCartItemTaxTotal - $ishippingTaxTotal - $iDiscountTaxTotal;
 		if ( $iTaxDifference != 0 ) {
 			$nr ++;
 			$items[ $nr ]['type']       = 'vatcorrection';
@@ -640,7 +677,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$items[ $nr ]['vat_amount'] = 0;
 		}
 
-		$iCorrection = round( $iOrderTotal - $iCartItemTotal - $iCartItemTaxTotal - $iShippingTotal - $iShippingVatTotal - $iExtraFee - $iTaxDifference );
+		$iCorrection = round( $iOrderTotal - $iCartItemTotal - $iCartItemTaxTotal - $iShippingTotal - $ishippingTaxTotal - $iExtraFee - $iTaxDifference - $iDiscountTotal - $iDiscountTaxTotal);
 
 		if ( $iCorrection != 0 ) {
 
