@@ -735,20 +735,20 @@ class cardgate {
 <script>
                 jQuery(document).ready(function($){
                     $data = '<h3><?php echo __('Add Extra Fees','cardgate');?></h3><table class="form-table">';
-                    $data += '<tr valign="top">';
+                    $data += '<tr vertical-align="top">';
                     $data += '<th scope="row" class="titledesc"><?php echo __('Extra Fee','cardgate');?></th>';
                     $data += '<td class="forminp">';
                     $data += '<fieldset>';
                     $data += '<input style="" name="<?php echo $extra_charges_id?>" id="<?php echo $extra_charges_id?>" type="text" value="<?php echo $extra_charges?>"/>';
                     $data += '<br /></fieldset></td></tr>';
     
-                    $data += '<tr valign="top">';
+                    $data += '<tr vertical-align="top">';
                     $data += '<th scope="row" class="titledesc"><?php echo __('Label for Extra Fee','cardgate');?></th>';
                     $data += '<td class="forminp">';
                     $data += '<fieldset>';
                     $data += '<input style="" name="<?php echo $extra_charges_label?>" id="<?php echo $extra_charges_label?>" type="text" value="<?php echo $extra_charges_cust?>" placeholder="<?php echo __('My Custom Label','cardgate');?>"/>';
                     $data += '<br /></fieldset></td></tr>';
-                    $data += '<tr valign="top">';
+                    $data += '<tr vertical-align="top">';
                     $data += '<th scope="row" class="titledesc"><?php echo __('Fee type','cardgate');?></th>';
                     $data += '<td class="forminp">';
                     $data += '<fieldset>';
