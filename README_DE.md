@@ -1,4 +1,4 @@
-f![CardGate](https://cdn.curopayments.net/thumb/200/logos/cardgate.png)
+![CardGate](https://cdn.curopayments.net/thumb/200/logos/cardgate.png)
 
 # CardGate Modul für WooCommerce
 
