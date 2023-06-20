@@ -6,12 +6,12 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 3.1.24
+ * Version: 3.1.25
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
  * WC requires at least: 3.0.0
- * WC tested up to: 7.2.2
+ * WC tested up to: 7.8.0
  * License: GPLv3 or later
  */
 
@@ -20,15 +20,17 @@ require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
 class cardgate {
 
     protected $_Lang = NULL;
-
+    protected $current_gateway_title = '';
+    protected $current_gateway_extra_charges = '';
+    protected $plugin_url;
     /**
      * Initialize plug-in
      */
     function __construct() {
         // Set up localisation.
         $this->load_plugin_textdomain();
-        $this->current_gateway_title = '';
-        $this->current_gateway_extra_charges = '';
+        $this->set_plugin_url();
+
         add_action('admin_head', array($this,'add_cgform_fields'));
         add_action('woocommerce_cart_calculate_fees', array($this,'calculate_totals'), 10, 1);
         add_action('wp_enqueue_scripts', array($this,'load_cg_script'));
@@ -818,13 +820,13 @@ class cardgate {
     }
 
     function load_cg_script() {
-        wp_enqueue_script('wc-add-extra-charges', $this->plugin_url() . '/assets/app.js', array(
+        wp_enqueue_script('wc-add-extra-charges', $this->plugin_url . '/assets/app.js', array(
             'wc-checkout'
         ), false, true);
     }
 
-    public function plugin_url() {
-        return $this->plugin_url = untrailingslashit(plugins_url('/', __FILE__));
+    public function set_plugin_url() {
+        $this->plugin_url = untrailingslashit(plugins_url('/', __FILE__));
     }
 
     private function get_methods($iSiteId, $iMerchantId, $sMerchantApiKey, $bIsTest) {
