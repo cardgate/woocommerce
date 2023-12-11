@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 3.1.26
+ * Version: 3.1.27
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
@@ -32,6 +32,11 @@ class cardgate {
         $this->load_plugin_textdomain();
         $this->set_plugin_url();
 
+	    add_action( 'before_woocommerce_init', function() {
+		    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			    \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+		    }
+	    } );
         add_action('admin_head', array($this,'add_cgform_fields'));
         add_action('woocommerce_cart_calculate_fees', array($this,'calculate_totals'), 10, 1);
         add_action('wp_enqueue_scripts', array($this,'load_cg_script'));
