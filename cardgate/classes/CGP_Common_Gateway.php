@@ -83,7 +83,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Fetch bank options from Card Gate
 	 */
-	private function getBankOptions() {
+	public function getBankOptions() {
 		$this->checkBankOptions();
 		$aIssuers = get_option( 'sIssuers' );
 		return $aIssuers;
@@ -199,14 +199,15 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	public function process_payment( $iOrderId ) {
 		global $woocommerce;
 		try {
-
+			$oOrder = new WC_Order( $iOrderId );
+            $this->correct_payment_fee($oOrder);
+            $oOrder->save();
 			$this->savePaymentData( $iOrderId );
 
 			$iMerchantId     = ( get_option( 'cgp_merchant_id' ) ? get_option( 'cgp_merchant_id' ) : 0 );
 			$sMerchantApiKey = ( get_option( 'cgp_merchant_api_key' ) ? get_option( 'cgp_merchant_api_key' ) : 0 );
 			$bIsTest         = ( get_option( 'cgp_mode' ) == 1 ? true : false );
 			$sLanguage       = substr( get_locale(), 0, 2 );
-			$oOrder          = new WC_Order( $iOrderId );
 
 			$sVersion = ( $this->get_woocommerce_version() == '' ? 'unkown' : $this->get_woocommerce_version() );
 
@@ -368,7 +369,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 
 				return [
 					'result'   => 'success',
-					'redirect' => $woocommerce->cart->get_checkout_url()
+					'redirect' => wc_get_checkout_url()
 				];
 			}
 		} catch ( cardgate\api\Exception $oException_ ) {
@@ -377,10 +378,110 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 
 			return [
 				'result'   => 'success',
-				'redirect' => $woocommerce->cart->get_checkout_url()
+				'redirect' => wc_get_checkout_url()
 			];
 		}
 	}
+
+    protected function correct_payment_fee(&$oOrder) {
+        if ($this->has_block_checkout()){
+	        $fees = $oOrder->get_fees();
+            $feeData = $this->getFeeData($oOrder->get_payment_method());
+	        $hasFee = array_key_exists('fee',$feeData) && $feeData['fee'] !== 0.0;
+            $correctedFee = false;
+	        foreach ($fees as $fee) {
+		        $feeName = $fee->get_name();
+		        $feeId = $fee->get_id();
+		        $hasCardgateFee = strpos($feeName, $feeData['label']) !== false;
+		        if ($hasCardgateFee) {
+			        if ($feeData['amount'] == (float)$fee->get_amount('edit')) {
+				        $correctedFee = true;
+				        continue;
+			        }
+			        if (!$correctedFee) {
+				        $this->removeOrderFee($oOrder, $feeId);
+				        $correctedFee = true;
+				        continue;
+			        }
+			        $this->removeOrderFee($oOrder, $feeId);
+			        $this->orderAddFee($oOrder, $feeData['fee'], $feeData['label']);
+			        $correctedFee = true;
+		        }
+	        }
+	        if (!$correctedFee) {
+		        if ($hasFee) {
+			        $this->orderAddFee($oOrder, $feeData['fee'], $feeData['label']);
+		        }
+	        }
+        }
+        if ($hasFee) {
+            $feeName = $feeData['label'];
+	        $this->setSessionfee( $oOrder, $feeName );
+        }
+        return $oOrder;
+    }
+
+    function setSessionFee($oOrder, $feeName){
+	    WC()->session->extra_cart_fee = WC()->session->extra_cart_fee_tax = 0;
+	    $aFees = $oOrder->get_fees();
+	    foreach($aFees as $fee){
+		    if($fee['name'] == $feeName){
+			    WC()->session->extra_cart_fee = $fee->get_total();
+			    WC()->session->extra_cart_fee_tax = $fee->get_total_tax();
+		    }
+	    }
+    }
+
+	protected function removeOrderFee(&$oOrder, int $feeId) {
+		$oOrder->remove_item($feeId);
+		wc_delete_order_item($feeId);
+		$oOrder->calculate_totals();
+	}
+
+	protected function orderAddFee(&$oOrder, $amount, $feeName) {
+		$item_fee = new \WC_Order_Item_Fee();
+		$item_fee->set_name($feeName);
+		$item_fee->set_amount($amount);
+		$item_fee->set_total($amount);
+		$item_fee->set_tax_status(true);
+		$oOrder->add_item($item_fee);
+		$oOrder->calculate_totals();
+	}
+
+	protected function getFeeData($method) {
+		global $woocommerce;
+		$woocommerce->cart;
+		$woocommerce->cart->calculate_totals();
+		$data = [];
+		$fee = get_option('woocommerce_' . $method . '_extra_charges');
+		$fee = $fee == "" ? 0: $fee;
+		$label = get_option( 'woocommerce_' . $method . '_extra_charges_label');
+		$type = get_option('woocommerce_' . $method . '_extra_charges_type');
+		if (isset($label) && strlen($label) > 2) {
+			if ($type == 'percentage'){
+				$label .= ' '. $fee.'%';
+			}
+		} else {
+			$label= $this->current_gateway_title . '  Payment Charges ';
+		}
+
+		if ($type == "percentage") {
+			$cart_total = (float) $woocommerce->cart->get_subtotal('edit');
+			$payment_fee = ($cart_total * $fee) / 100;
+		} else {
+			$payment_fee = $fee;
+		}
+		$data['fee'] = $payment_fee;
+		$data['type'] = ($type == "percentage" ? $fee . '%' : 'Fixed');
+		$data['label'] = $label;
+		return $data;
+	}
+
+    public function has_block_checkout(){
+        $uses_blocks = class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType');
+	    $isClassicCheckout = isset($_REQUEST["wc-ajax"]) && $_REQUEST["wc-ajax"] === "checkout";
+        return ($uses_blocks && !$isClassicCheckout);
+    }
 
 	// ////////////////////////////////////////////////
 
@@ -478,11 +579,8 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 				$payment_id = $result['id'];
 			}
 		}
-		if ( WC()->version < '3.0.0' ) {
-			$order_id = $order->id;
-		} else {
-			$order_id = $order->get_id();
-		}
+
+        $order_id = $order->get_id();
 
 		$data = [
 			'order_id'         => $order_id,
@@ -633,8 +731,21 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 
 		$fpExtraFee = ( empty( $woocommerce->session->extra_cart_fee ) ? 0 : $woocommerce->session->extra_cart_fee );
 		$iExtraFee  = round( $fpExtraFee * 100 );
+		$fpExtraFeeTax = ( empty( $woocommerce->session->extra_cart_fee_tax ) ? 0 : $woocommerce->session->extra_cart_fee_tax );
+		$iExtraFeeTax  = round( $fpExtraFeeTax * 100 );
 
-		if ( $iExtraFee > 0 ) {
+        if ($iExtraFeeTax > 0){
+            $iTaxRate = round($iExtraFeeTax / $fpExtraFee,2);
+	        $nr ++;
+	        $items[ $nr ]['type']       = 'paymentfee';
+	        $items[ $nr ]['model']      = 'extra_costs';
+	        $items[ $nr ]['name']       = 'payment_fee';
+	        $items[ $nr ]['quantity']   = 1;
+	        $items[ $nr ]['price_wt']   = $iExtraFee;
+	        $items[ $nr ]['vat']        = $iTaxRate;
+	        $items[ $nr ]['vat_amount'] = $iExtraFeeTax;
+
+        } elseif ( $iExtraFee > 0 ) {
 
 			$nr ++;
 			$items[ $nr ]['type']       = 'paymentfee';
@@ -665,7 +776,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
             $items[ $nr ]['vat_amount'] = $iDiscountTaxTotal;
         }
 
-		$iTaxDifference = round( $oOrder->get_total_tax() * 100 ) - $iCartItemTaxTotal - $ishippingTaxTotal - $iDiscountTaxTotal;
+		$iTaxDifference = round( $oOrder->get_total_tax() * 100 ) - $iCartItemTaxTotal - $ishippingTaxTotal - $iExtraFeeTax - $iDiscountTaxTotal;
 		if ( $iTaxDifference != 0 ) {
 			$nr ++;
 			$items[ $nr ]['type']       = 'vatcorrection';
@@ -677,7 +788,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$items[ $nr ]['vat_amount'] = 0;
 		}
 
-		$iCorrection = round( $iOrderTotal - $iCartItemTotal - $iCartItemTaxTotal - $iShippingTotal - $ishippingTaxTotal - $iExtraFee - $iTaxDifference - $iDiscountTotal - $iDiscountTaxTotal);
+		$iCorrection = round( $iOrderTotal - $iCartItemTotal - $iCartItemTaxTotal - $iShippingTotal - $ishippingTaxTotal - $iExtraFee - $iExtraFeeTax - $iTaxDifference - $iDiscountTotal - $iDiscountTaxTotal);
 
 		if ( $iCorrection != 0 ) {
 
@@ -705,11 +816,16 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	 */
 	public function validate_fields() {
 		global $woocommerce;
-
-		if ( $_POST['payment_method'] == 'cardgateideal' ) {
+		if (key_exists('wc-cardgateideal-new-payment-method',$_POST)) {
+			if ( empty( $_POST['cardgateideal_issuer'] ) || $_POST['cardgateideal_issuer'] == '0' ) {
+				wc_add_notice( __( ' Choose your bank first, please', 'cardgate' ), 'error' );
+				return false;
+			} else {
+				$this->bankOption = $_POST['cardgateideal_issuer'];
+			}
+		} elseif (key_exists('payment_method', $_POST) &&  $_POST['payment_method'] == 'cardgateideal' ) {
 			if ( empty( $_POST['cgp_bank_options'] ) || $_POST['cgp_bank_options'] == '0' ) {
 				wc_add_notice( __( ' Choose your bank first, please', 'cardgate' ), 'error' );
-
 				return false;
 			} else {
 				$this->bankOption = $_POST['cgp_bank_options'];

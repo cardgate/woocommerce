@@ -10,7 +10,7 @@
  */
 class WC_CardgateIdealqr extends CGP_Common_Gateway {
 
-    var $id = 'cardgateaIdealqr';
+    var $id = 'cardgateidealqr';
     var $title = '';
     var $method_title = 'Cardgate iDEAL QR';
     var $admin_title = 'Cardgate iDEAL QR';

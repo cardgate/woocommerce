@@ -6,12 +6,12 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 3.1.27
+ * Version: 3.1.28
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
  * WC requires at least: 3.0.0
- * WC tested up to: 8.1.1
+ * WC tested up to: 8.6.1
  * License: GPLv3 or later
  */
 
@@ -35,20 +35,26 @@ class cardgate {
 	    add_action( 'before_woocommerce_init', function() {
 		    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 			    \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+			    \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
 		    }
 	    } );
-        add_action('admin_head', array($this,'add_cgform_fields'));
-        add_action('woocommerce_cart_calculate_fees', array($this,'calculate_totals'), 10, 1);
-        add_action('wp_enqueue_scripts', array($this,'load_cg_script'));
+
+
+	    add_action('admin_head', array($this,'add_cgform_fields'));
+	    add_action('woocommerce_cart_calculate_fees', array($this,'calculate_totals'));
+        add_action('wp_enqueue_scripts', array($this,'load_cg_script'),10, 1);
         add_action('admin_menu', array(&$this,'CGPAdminMenu'));
         add_action('init', array(&$this,'cardgate_callback'), 20);
-        
+	    add_action( 'woocommerce_blocks_loaded', array($this,'woocommerce_cardgate_blocks_support' ));
+	    add_action('wp_loaded', array($this,'cardgate_checkout_fees'));
+
         register_activation_hook(__FILE__, array(&$this,'cardgate_install')); // hook for install
         register_deactivation_hook(__FILE__, array(&$this,'cardgate_uninstall')); // hook for uninstall
         update_option('cardgate_version', $this->plugin_get_version());
         add_action('plugins_loaded', array(&$this,'initiate_payment_classes'));
         update_option('is_callback_status_change', false);
         add_action('woocommerce_cancelled_order', array(&$this,'capture_payment_failed'));
+
         if (! $this->cardgate_settings())
             add_action('admin_notices', array(&$this,'my_error_notice'));
     }
@@ -467,7 +473,6 @@ class cardgate {
         
         // check that the callback came from CardGate
         if (isset($_GET['cgp_notify']) && $_GET['cgp_notify'] == 'true' && empty($_REQUEST['cgp_sitesetup'])) {
-            
             // hash check
             $bIsTest = (get_option('cgp_mode') == 1 ? true : false);
             if (! $this->hashCheck($_REQUEST, get_option('cgp_hashkey'), $bIsTest)) {
@@ -707,7 +712,6 @@ class cardgate {
         $methods[] = 'WC_CardgatePrzelewy24';
         $methods[] = 'WC_CardgateSofortbanking';
 	    $methods[] = 'WC_CardgateSpraypay';
-        
         return $methods;
     }
 
@@ -771,10 +775,9 @@ class cardgate {
 <?php
         }
     }
-
     public function calculate_totals($totals) {
         global $woocommerce;
-        
+
         $woocommerce->session->extra_cart_fee = 0;
         $available_gateways = $woocommerce->payment_gateways->get_available_payment_gateways();
         $current_gateway = '';
@@ -788,6 +791,7 @@ class cardgate {
                 $current_gateway = current($available_gateways);
             }
         }
+
         if ($current_gateway != '') {
             $current_gateway_id = $current_gateway->id;
             $extra_charges_id = 'woocommerce_' . $current_gateway_id . '_extra_charges';
@@ -818,11 +822,15 @@ class cardgate {
                 } else {
                     $t6 = $this->current_gateway_title . '  Extra Charges -  ';
                 }
+
                 $woocommerce->cart->add_fee(__($t6 . $t5), $t1);
                 $woocommerce->session->extra_cart_fee = $t1;
             }
         }
         return $totals;
+    }
+    public function is_ajax_block_update($post){
+        return ( isset( $post['action'] ) && $post['action'] == 'wp_ajax_cardgate_checkout_fees' ) ? true : false;
     }
 
     function load_cg_script() {
@@ -831,6 +839,240 @@ class cardgate {
         ), false, true);
     }
 
+    function woocommerce_cardgate_blocks_support(){
+	    // Check if the required class exists
+	    if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+		    return;
+	    }
+
+	    // Include the custom Blocks Checkout class
+	    require_once 'classes/woocommerce-blocks/giropay/GiropayCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\GiropayCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/bancontact/BancontactCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\BancontactCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/afterpay/AfterpayCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\AfterpayCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/banktransfer/BanktransferCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\BanktransferCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/billink/BillinkCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\BillinkCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/bitcoin/BitcoinCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\BitcoinCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/creditcard/CreditcardCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\CreditcardCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/directdebit/DirectDebitCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\DirectDebitCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/giftcard/GiftcardCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\GiftcardCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/ideal/IdealCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\IdealCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/idealqr/IdealqrCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\IdealqrCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/klarna/KlarnaCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\KlarnaCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/onlineueberweisen/OnlineueberweisenCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\OnlineueberweisenCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/paypal/PaypalCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\PaypalCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/paysafecard/PaysafecardCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\PaysafecardCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/paysafecash/PaysafecashCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\PaysafecashCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/przelewy24/Przelewy24Cardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\Przelewy24Cardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/sofortbanking/SofortbankingCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\SofortbankingCardgate() );
+		    }
+	    );
+	    require_once 'classes/woocommerce-blocks/spraypay/SpraypayCardgate.php';
+	    add_action(
+		    'woocommerce_blocks_payment_method_type_registration',
+		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\SpraypayCardgate() );
+		    }
+	    );
+    }
+
+    public function cardgate_checkout_fees() {
+        global $woocommerce;
+        if ( isset( $_POST ) && $this->is_ajax_block_update( $_POST ) ) {
+		    $method = $_POST['method'];
+            $feeData = $this->getFeeData($method);
+
+		    $this->cartRemoveFee( $feeData['label'] );
+		    $newTotal = (float) $woocommerce->cart->get_totals()['total'];
+		    $totalTax = $woocommerce->cart->get_totals()['total_tax'];
+		    $noSurchargeData = [
+
+			    'amount' => false,
+			    'name' => '',
+			    'currency' => get_woocommerce_currency_symbol(),
+			    'newTotal' => $newTotal,
+			    'totalTax' => $totalTax,
+		    ];
+		    if (!$feeData['fee'] || $feeData['fee'] == 0) {
+			    wp_send_json_success($noSurchargeData);
+			    return;
+		    }
+
+		    $feeAmount = $feeData['fee'];
+		    $label = $feeData['label'];
+	        add_action('woocommerce_cart_calculate_fees', static function () use ($label, $feeAmount) {
+		        global $woocommerce;
+		        $woocommerce->cart->add_fee($label, $feeAmount, true, 'standard');
+	        });
+
+            //add global woocommerce.
+
+		    $woocommerce->cart->calculate_totals();
+
+		    $feeAmountTaxed = (float) $woocommerce->cart->get_totals()['fee_total'];
+		    $taxDisplayMode = get_option('woocommerce_tax_display_shop');
+		    if ($taxDisplayMode === 'incl') {
+			    $feeAmountTaxed = $feeAmountTaxed + (float) $woocommerce->cart->get_totals()['fee_tax'];
+		    }
+		    $newTotal = (float) $woocommerce->cart->get_totals()['total'];
+		    $totalTax = $woocommerce->cart->get_totals()['total_tax'];
+		    $data = [
+			    'amount' => $feeAmountTaxed,
+			    'name' => $feeData['label'],
+			    'currency' => get_woocommerce_currency_symbol(),
+			    'newTotal' => $newTotal,
+			    'totalTax' => $totalTax,
+			    'cart' => $woocommerce->cart->get_totals(),
+		    ];
+
+		    wp_send_json_success($data);
+	    }
+    }
+	protected function cartRemoveFee($label)
+	{
+		add_action('woocommerce_before_calculate_totals', static function () use ($label) {
+			$fees = WC()->cart->get_fees();
+			foreach ($fees as $key => $fee) {
+				if ($fees[$key]->name === $label) {
+					unset($fees[$key]);
+				}
+			}
+			WC()->cart->fees_api()->set_fees($fees);
+		});
+	}
+    protected function getFeeData($method) {
+        global $woocommerce;
+        $woocommerce->cart;
+	    $woocommerce->cart->calculate_totals();
+        $data = [];
+	    $fee = get_option('woocommerce_' . $method . '_extra_charges');
+        $fee = $fee == "" ? 0: $fee;
+	    $label = get_option( 'woocommerce_' . $method . '_extra_charges_label');
+	    $type = get_option('woocommerce_' . $method . '_extra_charges_type');
+	    if (isset($label) && strlen($label) > 2) {
+		    if ($type == 'percentage'){
+			    $label .= ' '. $fee.'%';
+		    }
+	    } else {
+		    $label= $this->current_gateway_title . '  Payment Charges ';
+	    }
+
+        if ($type == "percentage") {
+            $cart_total = (float) $woocommerce->cart->get_subtotal('edit');
+            $payment_fee = ($cart_total * $fee) / 100;
+        } else {
+            $payment_fee = $fee;
+        }
+        $data['fee'] = $payment_fee;
+        $data['type'] = ($type == "percentage" ? $fee . '%' : 'Fixed');
+        $data['label'] = $label;
+        return $data;
+    }
     public function set_plugin_url() {
         $this->plugin_url = untrailingslashit(plugins_url('/', __FILE__));
     }
@@ -889,5 +1131,4 @@ if (function_exists('spl_autoload_register')) :
     }
     spl_autoload_register('cardgate_autoload');
 endif;
-
 ?>
