@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 3.1.28
+ * Version: 3.1.29
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
@@ -701,7 +701,6 @@ class cardgate {
         $methods[] = 'WC_CardgateCreditcard';
         $methods[] = 'WC_CardgateDirectDebit';
         $methods[] = 'WC_CardgateGiftcard';
-        $methods[] = 'WC_CardgateGiropay';
         $methods[] = 'WC_CardgateIdeal';
         $methods[] = 'WC_CardgateIdealqr';
         $methods[] = 'WC_CardgateKlarna';
@@ -846,13 +845,6 @@ class cardgate {
 	    }
 
 	    // Include the custom Blocks Checkout class
-	    require_once 'classes/woocommerce-blocks/giropay/GiropayCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\GiropayCardgate() );
-		    }
-	    );
 	    require_once 'classes/woocommerce-blocks/bancontact/BancontactCardgate.php';
 	    add_action(
 		    'woocommerce_blocks_payment_method_type_registration',
