@@ -1,5 +1,5 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 
 /**
  * iDEAL payment method integration

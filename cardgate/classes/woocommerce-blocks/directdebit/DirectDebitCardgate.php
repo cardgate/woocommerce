@@ -1,6 +1,5 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
-
+use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 /**
  * DirectDebit payment method integration
  */
@@ -63,12 +62,14 @@ final class DirectDebitCardgate extends AbstractPaymentMethodType {
 			'icon'                              => $this->iconpath.'directdebit.svg',
 			'show_icon'                         => $this->settings['show_icon'],
 			'supports'                          =>['products'],
+            'feeUrl'                            => $this->settings['feeUrl'],
 		);
 	}
 	private function get_settings(){
 		$settings = get_option( 'woocommerce_cardgatedirectdebit_settings', [] );
 		$use_icon = get_option('cgp_checkoutdisplay');
 		$settings['show_icon'] = ($use_icon == 'withlogo');
+        $settings['feeUrl'] =  admin_url('admin-ajax.php');
 		return $settings;
 	}
 }

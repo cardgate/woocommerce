@@ -201,6 +201,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		try {
 			$oOrder = new WC_Order( $iOrderId );
             $this->correct_payment_fee($oOrder);
+            $oOrder->calculate_totals(false);
             $oOrder->save();
 			$this->savePaymentData( $iOrderId );
 
@@ -236,7 +237,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			method_exists( $oOrder, 'get_billing_email' ) ? $billing_email = $oOrder->get_billing_email() : $billing_email = $oOrder->billing_email;
 			method_exists( $oOrder, 'get_billing_phone' ) ? $billing_phone = $oOrder->get_billing_phone() : $billing_phone = $oOrder->billing_phone;
 			method_exists( $oOrder, 'get_billing_first_name' ) ? $billing_first_name = $oOrder->get_billing_first_name() : $billing_first_name = $oOrder->billing_first_name;
-			method_exists( $oOrder, 'get_billing_last_name' ) ? $billing_last_name = $oOrder->get_billing_last_name() : $billing_last_name = $oOrder->billing_last_name;
 			method_exists( $oOrder, 'get_billing_last_name' ) ? $billing_last_name = $oOrder->get_billing_last_name() : $billing_last_name = $oOrder->billing_last_name;
 			method_exists( $oOrder, 'get_billing_address_1' ) ? $billing_address_1 = $oOrder->get_billing_address_1() : $billing_address_1 = $oOrder->billing_address_1;
 			method_exists( $oOrder, 'get_billing_address_2' ) ? $billing_address_2 = $oOrder->get_billing_address_2() : $billing_address_2 = $oOrder->billing_address_2;

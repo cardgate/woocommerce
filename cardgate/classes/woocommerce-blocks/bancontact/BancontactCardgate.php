@@ -1,5 +1,5 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 
 /**
  * Bancontact payment method integration
@@ -63,7 +63,8 @@ final class BancontactCardgate extends AbstractPaymentMethodType {
 			'instructions'                      => isset( $this->settings['instructions'] ) ? $this->settings['instructions'] : '',
 			'icon'                              => $this->iconpath.'bancontact.svg',
 			'show_icon'                         => $this->settings['show_icon'],
-			'supports'                          =>['products'],
+			'supports'                          => ['products'],
+            'feeUrl'                            => $this->settings['feeUrl'],
 		);
 	}
 
@@ -74,6 +75,7 @@ final class BancontactCardgate extends AbstractPaymentMethodType {
 		$settings = get_option( 'woocommerce_cardgatebancontact_settings', [] );
 		$use_icon = get_option('cgp_checkoutdisplay');
 		$settings['show_icon'] = ($use_icon == 'withlogo');
+        $settings['feeUrl'] =  admin_url('admin-ajax.php');
 		return $settings;
 	}
 }

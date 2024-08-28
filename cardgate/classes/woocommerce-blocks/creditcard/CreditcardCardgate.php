@@ -1,5 +1,5 @@
 <?php
-namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 
 /**
  * Creditcard payment method integration
@@ -69,6 +69,7 @@ final class CreditcardCardgate extends AbstractPaymentMethodType {
 		$settings = get_option( 'woocommerce_cardgatecreditcard_settings', [] );
 		$use_icon = get_option('cgp_checkoutdisplay');
 		$settings['show_icon'] = ($use_icon == 'withlogo');
+        $settings['feeUrl'] =  admin_url('admin-ajax.php');
 		return $settings;
 	}
 }
