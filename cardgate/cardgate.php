@@ -18,12 +18,28 @@
 require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
 
 class cardgate {
-
-    protected $_Lang = NULL;
     protected $current_gateway_title = '';
     protected $current_gateway_extra_charges = '';
 	protected $current_gateway_extra_charges_type_value = '';
     protected $plugin_url;
+    protected $payment_names = ['Afterpay',
+                                'Bancontact',
+                                'Banktransfer',
+                                'Billink',
+                                'Bitcoin',
+                                'Creditcard',
+                                'DirectDebit',
+                                'Giftcard',
+                                'Ideal',
+                                'Idealqr',
+                                'Klarna',
+                                'Mistercash',
+                                'Onlineueberweisen',
+                                'PayPal',
+                                'Paysafecard',
+                                'Przelewy24',
+                                'Sofortbanking',
+                                'Spraypay'];
     /**
      * Initialize plug-in
      */
@@ -32,6 +48,8 @@ class cardgate {
         $this->load_plugin_textdomain();
         $this->set_plugin_url();
 
+        add_action( 'plugins_loaded', array(&$this, 'includes' ), 0 );
+        add_action('plugins_loaded', array(&$this,'initiate_payment_classes'));
 	    add_action( 'before_woocommerce_init', function() {
 		    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 			    \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
@@ -51,7 +69,6 @@ class cardgate {
         register_activation_hook(__FILE__, array(&$this,'cardgate_install')); // hook for install
         register_deactivation_hook(__FILE__, array(&$this,'cardgate_uninstall')); // hook for uninstall
         update_option('cardgate_version', $this->plugin_get_version());
-        add_action('plugins_loaded', array(&$this,'initiate_payment_classes'));
         update_option('is_callback_status_change', false);
         add_action('woocommerce_cancelled_order', array(&$this,'capture_payment_failed'));
 
@@ -64,18 +81,9 @@ class cardgate {
      */
     function cardgate_install() {
         global $wpdb;
-        
-        // check if we need to do an update
-        $_Do_Update = false;
-        $sCurrent_Version = get_option('cgp_version') ? get_option('cgp_version') : '0.0.0';
-        $sLatest_Version = '2.1.13';
-        
-        if (! empty($sCurrent_Version)) {
-            if (version_compare($sCurrent_Version, $sLatest_Version, '<') == true) {
-                $_Do_Update = true;
-            }
-        }
-        
+
+        // Cardgate payments table
+        $sTableName = $wpdb->prefix . 'cardgate_payments';
         $sCharsetCollate = '';
         if (! empty($wpdb->charset)) {
             $sCharsetCollate = 'DEFAULT CHARACTER SET ' . $wpdb->charset;
@@ -84,11 +92,8 @@ class cardgate {
             $sCharsetCollate .= ' COLLATE ' . $wpdb->collate;
         }
         
-        // Cardgate payments table
-        $sTableName = $wpdb->prefix . 'cardgate_payments';
-        
         // Do the create just in case the db does not exists
-        $sCreate_Query = "CREATE TABLE IF NOT EXISTS $sTableName (
+        $sCreateQuery = "CREATE TABLE IF NOT EXISTS $sTableName (
 			id MEDIUMINT(8) UNSIGNED NOT NULL AUTO_INCREMENT ,
                         order_id VARCHAR(16) NULL ,
 			parent_id VARCHAR(16) NULL ,
@@ -113,60 +118,8 @@ class cardgate {
 			) $sCharsetCollate;";
         
         require_once ABSPATH . '/wp-admin/includes/upgrade.php';
-        dbDelta($sCreate_Query);
-        
-        if ($_Do_Update == true) {
-            
-            $qry = "SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT, CHARACTER_MAXIMUM_LENGTH ";
-            $qry .= "FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '" . $sTableName . "' ";
-            $qry .= "AND table_schema = '" . DB_NAME . "'";
-            $aRows = $wpdb->get_results($qry, ARRAY_A);
-            $subscription_exists = false;
-            $transaction_id_exists = false;
-            $transaction_id_max_length = 0;
-            $parent_order_id_exists = false;
-            $parent_id_exists = false;
-            
-            foreach ($aRows as $aRow) {
-                switch ($aRow['COLUMN_NAME']) {
-                    case 'subscription_id':
-                        $subscription_exists = true;
-                        break;
-                    case 'transaction_id':
-                        $transaction_id_exists = true;
-                        $transaction_id_max_length = $aRow['CHARACTER_MAXIMUM_LENGTH'];
-                        break;
-                    case 'parent_order_id':
-                        $parent_order_id_exists = true;
-                        break;
-                    case 'parent_id':
-                        $parent_id_exists = true;
-                        break;
-                }
-            }
-            
-            if (! $parent_id_exists && ! $parent_order_id_exists) {
-                $sUpdate_Query = "ALTER TABLE $sTableName ADD `parent_id` VARCHAR(16) NULL AFTER `order_id` ";
-                $wpdb->query($sUpdate_Query);
-            }
-            if ($parent_order_id_exists && ! $parent_id_exists) {
-                $sUpdate_Query = "ALTER TABLE $sTableName CHANGE parent_order_id parent_id varchar(16)";
-                $wpdb->query($sUpdate_Query);
-            }
-            if (! $transaction_id_exists) {
-                $sUpdate_Query = "ALTER TABLE $sTableName CHANGE session_id transaction_id varchar(16)";
-                $wpdb->query($sUpdate_Query);
-            }
-            if ($transaction_id_max_length != 16) {
-                $sUpdate_Query = "ALTER TABLE $sTableName CHANGE transaction_id transaction_id varchar(16)";
-                $wpdb->query($sUpdate_Query);
-            }
-            if (! $subscription_exists) {
-                $sUpdate_Query = "ALTER TABLE $sTableName ADD subscription_id VARCHAR(16) NULL AFTER transaction_id ";
-                $wpdb->query($sUpdate_Query);
-            }
-            update_option('cgp_version', $this->plugin_get_version());
-        }
+        dbDelta($sCreateQuery);
+        update_option('cgp_version', $this->plugin_get_version());
     }
 
     // ////////////////////////////////////////////////
@@ -187,13 +140,38 @@ class cardgate {
      * - WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
      */
     public function load_plugin_textdomain() {
-        $locale = apply_filters('plugin_locale', get_locale(), 'cardgate');
-        
-        // load_textdomain( 'woocommerce', WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo' );
         load_plugin_textdomain('cardgate', false, plugin_basename(dirname(__FILE__)) . '/i18n/languages');
     }
 
-    // /d/////////////////////////////////////////////
+    /**
+     * Plugin includes.
+     */
+    public function includes() {
+
+        // Make the WC_Gateway_Dummy class available.
+        if ( class_exists( 'WC_Payment_Gateway' ) ) {
+            require_once 'classes/CGP_Common_Gateway.php';
+            require_once 'classes/WC_CardgateAfterpay.php';
+            require_once 'classes/WC_CardgateBancontact.php';
+            require_once 'classes/WC_CardgateBanktransfer.php';
+            require_once 'classes/WC_CardgateBillink.php';
+            require_once 'classes/WC_CardgateBitcoin.php';
+            require_once 'classes/WC_CardgateCreditcard.php';
+            require_once 'classes/WC_CardgateDirectDebit.php';
+            require_once 'classes/WC_CardgateGiftcard.php';
+            require_once 'classes/WC_CardgateIdeal.php';
+            require_once 'classes/WC_CardgateIdealqr.php';
+            require_once 'classes/WC_CardgateKlarna.php';
+            require_once 'classes/WC_CardgateMistercash.php';
+            require_once 'classes/WC_CardgateOnlineueberweisen.php';
+            require_once 'classes/WC_CardgatePayPal.php';
+            require_once 'classes/WC_CardgatePaysafecard.php';
+            require_once 'classes/WC_CardgatePaysafecash.php';
+            require_once 'classes/WC_CardgatePrzelewy24.php';
+            require_once 'classes/WC_CardgateSofortbanking.php';
+            require_once 'classes/WC_CardgateSpraypay.php';
+        }
+    }
     
     /**
      * Configuration page
@@ -202,8 +180,7 @@ class cardgate {
         global $wpdb;
         
         $icon_file = plugins_url('images/cardgate.png', __FILE__);
-      
-        $message = '';
+        $notice = '';
         
         if (isset($_POST['Submit'])) {
             if (empty($_POST) || ! wp_verify_nonce($_POST['nonce134'], 'action854')) {
@@ -212,9 +189,9 @@ class cardgate {
             } else {
                 // process form data
                 update_option('cgp_mode', $_POST['cgp_mode']);
-                update_option('cgp_siteid', $_POST['cgp_siteid']);
+                update_option('cgp_siteid', trim($_POST['cgp_siteid']));
                 update_option('cgp_hashkey', $_POST['cgp_hashkey']);
-                update_option('cgp_merchant_id', $_POST['cgp_merchant_id']);
+                update_option('cgp_merchant_id', trim($_POST['cgp_merchant_id']));
                 update_option('cgp_merchant_api_key', $_POST['cgp_merchant_api_key']);
                 update_option('cgp_checkoutdisplay', $_POST['cgp_checkoutdisplay']);
                
@@ -231,106 +208,106 @@ class cardgate {
                 $oMethod = $aMethods[0];
                 
                 if (! is_object($oMethod)) {
-                    $message = sprintf('%s<br>%s'
+                    $notice = sprintf('%s<br>%s'
                         ,__('The settings are not correct for the Mode you chose.','cardgate'),__('See the instructions above. ', 'cardgate'));
                 }
                 $aMethods = $oMethod = null;
             }
         }
-        
-        if (get_option('cgp_siteid') != '' && get_option('cgp_hashkey') != '') {
-            $sNotice = $message;
-        } else {
-            $sNotice = __('The CardGate payment methods will only be visible in the WooCommerce Plugin, once the Site ID and Hashkey have been filled in.', 'cardgate');
+
+        if (get_option('cgp_siteid') != '' && get_option('cgp_hashkey') == '') {
+            $notice = __('The CardGate payment methods will only be visible in the WooCommerce Plugin, once the Site ID and Hashkey have been filled in.', 'cardgate');
         }
-        
-        $sAction_url = $_SERVER['REQUEST_URI'];
-        $sHtml = '<div class="wrap">
-				<form name="frmCardgate" action="' . $sAction_url . '" method="post">';
-        $sHtml .= wp_nonce_field('action854', 'nonce134');
-        $sHtml .= '<img style="max-width:100px;" src="' . $icon_file . '" />&nbsp;
-                <b>Version ' . get_option('cardgate_version') . '</b>
-				<h2>'. __('CardGate Settings', 'cardgate') . '</h2>
-				<table class="form-table">
-					<tbody>
-					<tr>
-						<th scope="row"
-						<td colspan="2">&nbsp</td>
-					</tr>
-					<tr>
-						<th scope="row">
-						<label for="cgp_mode">' . __('Mode', 'cardgate') . '</label>
-						</th>
-						<td>
-								<select style="width:60px;" id="cgp_mode" name="cgp_mode">
-									<option value="1"' . (get_option('cgp_mode') == '1' ? ('selected="selected"') : '') . '>Test</option>
-									<option value="0"' . (get_option('cgp_mode') == '0' ? ('selected="selected"') : '') . '>Live</option>
-								</select>
-						</td>
-					</tr>
-					<tr>
+        cardgate::get_config_html($icon_file, $notice);
+    }
+
+    static function get_config_html($icon_file, $notice){
+        $action_url = $_SERVER['REQUEST_URI'];
+        ?>
+        <div class="wrap">
+            <form name="frmCardgate" action="<?php echo $action_url ?>" method="post">
+            <?php wp_nonce_field('action854', 'nonce134')?>
+            <img style="max-width:100px;" src="<?php echo $icon_file ?>" />
+            <b>Version <?php echo get_option('cardgate_version') ?></b>
+                <h2> <?php echo __('CardGate Settings', 'cardgate')?></h2>
+                <table class="form-table">
+                    <tbody>
+                    <tr>
+                        <th scope="row">&nbsp</th>
+                            <td colspan="2">&nbsp</td>
+
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                        <label for="cgp_mode"><?php echo __('Mode', 'cardgate') ?></label>
+                        </th>
+                        <td>
+                                <select style="width:60px;" id="cgp_mode" name="cgp_mode">
+                                    <option value="1" <?php echo ( get_option('cgp_mode') == '1' ? ('selected="selected"') : '') ?>>Test</option>
+                                    <option value="0" <?php echo ( get_option('cgp_mode') == '0' ? ('selected="selected"') : '') ?>>Live</option>
+                                </select>
+                        </td>
+                    </tr>
+                    <tr>
                         <th scope="row">
                         <label for="cgp_siteid">Site ID</label>
                         </th>
-                        <td><input type="text" style="width:60px;" id="cgp_siteid" name="cgp_siteid" value="' . get_option('cgp_siteid') . '" />
+                        <td><input type="text" style="width:60px;" id="cgp_siteid" name="cgp_siteid" value=" <?php echo get_option('cgp_siteid') ?>" />
                         </td>
                     </tr>
-					<tr>
-						<th scope="row">
-						<label for="cgp_hashkey">' . __('Hash key', 'cardgate') . '</label>
-						</th>
-						<td><input type="text" style="width:150px;" id="cgp_hashkey" name="cgp_hashkey" value="' . get_option('cgp_hashkey') . '"/>
-						</td>
-					</tr>
-		            <tr>
-						<th scope="row">
-						<label for="cgp_merchant_id">Merchant ID</label>
-						</th>
-						<td><input type="text" style="width:60px;" id="cgp_merchant_id" name="cgp_merchant_id" value="' . get_option('cgp_merchant_id') . '"/>
-						</td>
-					</tr>
-				    <tr> 
-						<th scope="row">
-						<label for="cgp_merchant_api_key">' . __('API key', 'cardgate') . '</label>
-						</th>
-						<td><input type="text" style="width:600px;" id="cgp_merchant_api_key" name="cgp_merchant_api_key" value="' . get_option('cgp_merchant_api_key') . '"/>
-						</td>
-					</tr>
                     <tr>
-						<th scope="row">
-						<label for="cgp_checkoutdisplay">' . __('Checkout display', 'cardgate') . '</label>
-						</th>
-						<td>
-								<select style="width:140px;" id="cgp_checkoutdisplay" name="cgp_checkoutdisplay">
-									<option value="withoutlogo"' . (get_option('cgp_checkoutdisplay') == 'withoutlogo' ? ('selected="selected"') : '') . '>'.__('Without Logo','cardgate').'</option>
-									<option value="withlogo"' . (get_option('cgp_checkoutdisplay') == 'withlogo' ? ('selected="selected"') : '') . '>'.__('With Logo','cardgate').'</option>
-								</select>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2">' . sprintf('%s <b>%s</b> %s <a href="https://my.cardgate.com/">%s </a> &nbsp %s <a href="https://github.com/cardgate/woocommerce/blob/master/%s" target="_blank"> %s</a> %s.'
-						    , __('Use the ','cardgate'),__('Settings button', 'cardgate'), __('in your','cardgate'), __('My CardGate','cardgate'), __('to set these values, as explained in the','cardgate'),__('README.md','cardgate'), __('installation instructions','cardgate'), __('of this plugin','cardgate')).'</td>
-					</tr>
-					<tr>
-						<td colspan="2">' . __('These settings apply to all CardGate payment methods used in the WooCommerce plugin.', 'cardgate') . '</td>
-					</tr>
-					<tr>
-						<td colspan="2" style="height=60px;">&nbsp</td>
-					</tr>
-					<tr>
-						<td colspan="2"><b>' . $sNotice . '</b></td>
-					</tr>
-					<tr>
-						<td colspan="2">';
-        echo $sHtml;
-        submit_button(__('Save Changes'), 'primary', 'Submit', false);
-        echo '</td>
-					</tr>
-					</tbody>
-				</table>
-			</form>
-			</div>';
-    }
+                        <th scope="row">
+                        <label for="cgp_hashkey"><?php echo __('Hash key', 'cardgate') ?></label>
+                        </th>
+                        <td><input type="text" style="width:150px;" id="cgp_hashkey" name="cgp_hashkey" value="<?php echo get_option('cgp_hashkey')?>" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                        <label for="cgp_merchant_id">Merchant ID</label>
+                        </th>
+                        <td><input type="text" style="width:60px;" id="cgp_merchant_id" name="cgp_merchant_id" value="<?php echo get_option('cgp_merchant_id') ?> "/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                        <label for="cgp_merchant_api_key"><?php echo __('API key', 'cardgate') ?></label>
+                        </th>
+                        <td><input type="password" style="width:600px;" id="cgp_merchant_api_key" name="cgp_merchant_api_key" value="<?php echo get_option('cgp_merchant_api_key') ?>"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                        <label for="cgp_checkoutdisplay"><?php echo __('Checkout display', 'cardgate') ?></label>
+                        </th>
+                        <td>
+                                <select style="width:140px;" id="cgp_checkoutdisplay" name="cgp_checkoutdisplay">
+                                    <option value="withoutlogo"<?php echo (get_option('cgp_checkoutdisplay') == 'withoutlogo' ? ('selected="selected"') : '') ?> > <?php echo __('Without Logo','cardgate')?></option>
+                                    <option value="withlogo"<?php echo (get_option('cgp_checkoutdisplay') == 'withlogo' ? ('selected="selected"') : '') ?> > <?php echo __('With Logo','cardgate') ?></option>
+                                </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><?php sprintf('%s <b>%s</b> %s <a href="https://my.cardgate.com/">%s </a> &nbsp %s <a href="https://github.com/cardgate/woocommerce/blob/master/%s" target="_blank"> %s</a> %s.'
+            , __('Use the ','cardgate'),  __('Settings button', 'cardgate'), __('in your','cardgate'), __('My CardGate','cardgate'), __('to set these values, as explained in the','cardgate'),__('README.md','cardgate'), __('installation instructions','cardgate'), __('of this plugin','cardgate'))?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><?php echo __('These settings apply to all CardGate payment methods used in the WooCommerce plugin.', 'cardgate') ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="height=60px;">&nbsp</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><b><?php echo $notice ?></b></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><?php submit_button(__('Save Changes'), 'primary', 'Submit', false); ?>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    <?php }
 
     // //////////////////////////////////////////////
     
@@ -371,14 +348,10 @@ class cardgate {
      */
     public static function CGPAdminMenu() {
         add_menu_page('cardgate', $menuTitle = 'CardGate', $capability = 'manage_options', $menuSlug = 'cardgate_menu', $function = array(
-            __CLASS__,
-            'cardgate_config_page'
-        ), $iconUrl = plugins_url('cardgate/images/cgp_icon-16x16.png'));
+            __CLASS__, 'cardgate_config_page' ), $iconUrl = plugins_url('cardgate/images/cgp_icon-16x16.png'));
         
         add_submenu_page($parentSlug = 'cardgate_menu', $pageTitle = __('Settings', 'cardgate'), $menuTitle = __('Settings', 'cardgate'), $capability = 'manage_options', $menuSlug = 'cardgate_menu', $function = array(
-            __CLASS__,
-            'cardgate_config_page'
-        ));
+            __CLASS__, 'cardgate_config_page' ));
         
         add_submenu_page($parentSlug = 'cardgate_menu', $pageTitle = __('Payments Table', 'cardgate'), $menuTitle = __('Payments Table', 'cardgate'), $capability = 'manage_options', $menuSlug = 'cardgate_payments_table', $function = array(
             __CLASS__,
@@ -693,24 +666,9 @@ class cardgate {
     }
 
     function woocommerce_cardgate_add_gateways($methods) {
-        $methods[] = 'WC_CardgateAfterpay';
-        $methods[] = 'WC_CardgateBancontact';
-        $methods[] = 'WC_CardgateBanktransfer';
-        $methods[] = 'WC_CardgateBillink';
-        $methods[] = 'WC_CardgateBitcoin';
-        $methods[] = 'WC_CardgateCreditcard';
-        $methods[] = 'WC_CardgateDirectDebit';
-        $methods[] = 'WC_CardgateGiftcard';
-        $methods[] = 'WC_CardgateIdeal';
-        $methods[] = 'WC_CardgateIdealqr';
-        $methods[] = 'WC_CardgateKlarna';
-	    $methods[] = 'WC_CardgateOnlineueberweisen';
-        $methods[] = 'WC_CardgatePayPal';
-        $methods[] = 'WC_CardgatePaysafecard';
-        $methods[] = 'WC_CardgatePaysafecash';
-        $methods[] = 'WC_CardgatePrzelewy24';
-        $methods[] = 'WC_CardgateSofortbanking';
-	    $methods[] = 'WC_CardgateSpraypay';
+        foreach($this->payment_names as $payment_name){
+            $methods[] = 'WC_Cardgate'.$payment_name;
+        }
         return $methods;
     }
 
@@ -845,130 +803,34 @@ class cardgate {
 	    }
 
 	    // Include the custom Blocks Checkout class
+
 	    require_once 'classes/woocommerce-blocks/bancontact/BancontactCardgate.php';
-	    add_action(
+        require_once 'classes/woocommerce-blocks/afterpay/AfterpayCardgate.php';
+        require_once 'classes/woocommerce-blocks/banktransfer/BanktransferCardgate.php';
+        require_once 'classes/woocommerce-blocks/billink/BillinkCardgate.php';
+        require_once 'classes/woocommerce-blocks/bitcoin/BitcoinCardgate.php';
+        require_once 'classes/woocommerce-blocks/creditcard/CreditcardCardgate.php';
+        require_once 'classes/woocommerce-blocks/directdebit/DirectDebitCardgate.php';
+        require_once 'classes/woocommerce-blocks/giftcard/GiftcardCardgate.php';
+        require_once 'classes/woocommerce-blocks/ideal/IdealCardgate.php';
+        require_once 'classes/woocommerce-blocks/idealqr/IdealqrCardgate.php';
+        require_once 'classes/woocommerce-blocks/klarna/KlarnaCardgate.php';
+        require_once 'classes/woocommerce-blocks/onlineueberweisen/OnlineueberweisenCardgate.php';
+        require_once 'classes/woocommerce-blocks/paypal/PaypalCardgate.php';
+        require_once 'classes/woocommerce-blocks/paysafecard/PaysafecardCardgate.php';
+        require_once 'classes/woocommerce-blocks/paysafecash/PaysafecashCardgate.php';
+        require_once 'classes/woocommerce-blocks/przelewy24/Przelewy24Cardgate.php';
+        require_once 'classes/woocommerce-blocks/sofortbanking/SofortbankingCardgate.php';
+        require_once 'classes/woocommerce-blocks/spraypay/SpraypayCardgate.php';
+
+        add_action(
 		    'woocommerce_blocks_payment_method_type_registration',
 		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\BancontactCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/afterpay/AfterpayCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\AfterpayCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/banktransfer/BanktransferCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\BanktransferCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/billink/BillinkCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\BillinkCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/bitcoin/BitcoinCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\BitcoinCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/creditcard/CreditcardCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\CreditcardCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/directdebit/DirectDebitCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\DirectDebitCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/giftcard/GiftcardCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\GiftcardCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/ideal/IdealCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\IdealCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/idealqr/IdealqrCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\IdealqrCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/klarna/KlarnaCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\KlarnaCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/onlineueberweisen/OnlineueberweisenCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\OnlineueberweisenCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/paypal/PaypalCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\PaypalCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/paysafecard/PaysafecardCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\PaysafecardCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/paysafecash/PaysafecashCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\PaysafecashCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/przelewy24/Przelewy24Cardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\Przelewy24Cardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/sofortbanking/SofortbankingCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\SofortbankingCardgate() );
-		    }
-	    );
-	    require_once 'classes/woocommerce-blocks/spraypay/SpraypayCardgate.php';
-	    add_action(
-		    'woocommerce_blocks_payment_method_type_registration',
-		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-			    $payment_method_registry->register( new \Automattic\WooCommerce\Blocks\Payments\Integrations\SpraypayCardgate() );
+                foreach ($this->payment_names as $name){
+                    if ($name == 'Mistercash') continue;
+                    $blockmethod = $name.'Cardgate';
+                    $payment_method_registry->register( new $blockmethod() );
+                };
 		    }
 	    );
     }
@@ -976,13 +838,13 @@ class cardgate {
     public function cardgate_checkout_fees() {
         global $woocommerce;
         if ( isset( $_POST ) && $this->is_ajax_block_update( $_POST ) ) {
-		    $method = $_POST['method'];
-            $feeData = $this->getFeeData($method);
+		    $method             = $_POST['method'];
+            $feeData            = $this->getFeeData($method);
 
 		    $this->cartRemoveFee( $feeData['label'] );
-		    $newTotal = (float) $woocommerce->cart->get_totals()['total'];
-		    $totalTax = $woocommerce->cart->get_totals()['total_tax'];
-		    $noSurchargeData = [
+		    $newTotal           = (float) $woocommerce->cart->get_totals()['total'];
+		    $totalTax           = $woocommerce->cart->get_totals()['total_tax'];
+		    $noSurchargeData    = [
 
 			    'amount' => false,
 			    'name' => '',
@@ -995,8 +857,8 @@ class cardgate {
 			    return;
 		    }
 
-		    $feeAmount = $feeData['fee'];
-		    $label = $feeData['label'];
+		    $feeAmount  = $feeData['fee'];
+		    $label      = $feeData['label'];
 	        add_action('woocommerce_cart_calculate_fees', static function () use ($label, $feeAmount) {
 		        global $woocommerce;
 		        $woocommerce->cart->add_fee($label, $feeAmount, true, 'standard');
@@ -1051,11 +913,11 @@ class cardgate {
 			    $label .= ' '. $fee.'%';
 		    }
 	    } else {
-		    $label= $this->current_gateway_title . '  Payment Charges ';
+		    $label .= '  Payment Charges ';
 	    }
 
         if ($type == "percentage") {
-            $cart_total = (float) $woocommerce->cart->get_subtotal('edit');
+            $cart_total = (float) $woocommerce->cart->get_subtotal();
             $payment_fee = ($cart_total * $fee) / 100;
         } else {
             $payment_fee = $fee;
@@ -1108,19 +970,5 @@ class cardgate {
     }
 }
 
-// end class
-
-$mp = new cardgate();
-
-if (function_exists('spl_autoload_register')) :
-
-    function cardgate_autoload($name) {
-        $file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . $name . '.php';
-        
-        if (is_file($file)) {
-            require_once $file;
-        }
-    }
-    spl_autoload_register('cardgate_autoload');
-endif;
+new cardgate();
 ?>
