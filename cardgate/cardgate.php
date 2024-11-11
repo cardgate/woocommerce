@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 3.1.29
+ * Version: 3.2.1
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
@@ -315,7 +315,9 @@ class cardgate {
      * Generate the payment table
      */
     static function cardgate_payments_table() {
+	    require_once 'classes/Cardgate_PaymentsListTable.php';
         global $wp_list_table;
+
         $wp_list_table = new Cardgate_PaymentsListTable();
         $icon_file = plugins_url('images/cardgate.png', __FILE__);
         $wp_list_table->prepare_items();
