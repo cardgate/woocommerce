@@ -1,37 +1,53 @@
 msgid ""
+
 msgstr ""
-"Project-Id-Version: CardGate\n"
-"POT-Creation-Date: 2019-02-25 13:40+0000\n"
-"PO-Revision-Date: 2019-03-06 14:10+0000\n"
+"Project-Id-Version: CardGate 3.2.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-13 09:05+0100\n"
+"PO-Revision-Date: 2024-12-13 09:11+0100\n"
 "Last-Translator: admin <richard@cardgate.com>\n"
-"Language-Team: Nederlands\n"
-"Language: nl_NL\n"
+"Language-Team: Dutch (Netherlands)\n"
+"Language: nl-NL\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Loco https://localise.biz/\n"
-"X-Poedit-Basepath: ../..\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Poedit-Flags-xagettext: --add-comments=translators:\n"
-"X-Poedit-WPHeader: cardgate.php\n"
-"X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
-"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
-"X-Poedit-SearchPath-0: .\n"
-"X-Poedit-SearchPathExcluded-0: *.js\n"
-"Report-Msgid-Bugs-To: \n"
-"X-Loco-Version: 2.2.0; wp-4.2.15"
+"X-Generator: Loco https://localise.biz\n"
+"X-Loco-Source-Locale: en\n"
+"X-Loco-Project-Id: 165613\n"
+"X-Loco-Api-Version: 1.0.29 20241018-1"
 
-#: cardgate.php:215
+#. Plugin Name of the plugin/theme
+#. Author of the plugin/theme
+#: cardgate.php loco:675bf0eab9316b1ad60565d0
+msgid "CardGate"
+msgstr "CardGate"
+
+#. Plugin URI of the plugin/theme
+#. Author URI of the plugin/theme
+#: cardgate.php loco:675bf0eab9316b1ad60565d1
+msgid "http://cardgate.com"
+msgstr "http://cardgate.com"
+
+#. Description of the plugin/theme
+#: cardgate.php loco:675bf0eab9316b1ad60565d2
+msgid "Integrates Cardgate Gateway for WooCommerce into WordPress"
+msgstr "Integratie van CardGate Gateway voor WooCommerce in WordPress"
+
+#. Author URI of the plugin
+#: cardgate.php loco:675bf0eab9316b1ad60565d3
+msgid "https://www.cardgate.com"
+msgstr "https://www.cardgate.com"
+
+#: cardgate.php:215 loco:675bf0eab9316b1ad60565d4
 msgid "The settings are not correct for the Mode you chose."
 msgstr "De instellingen zijn niet correct voor de gekozen Mode."
 
-#: cardgate.php:215
+#: cardgate.php:215 loco:675bf0eab9316b1ad60565d5
 msgid "See the instructions above. "
 msgstr "Zie de instructies hierboven."
 
-#: cardgate.php:224
+#: cardgate.php:224 loco:675bf0eab9316b1ad60565d6
 msgid ""
 "The CardGate payment methods will only be visible in the WooCommerce Plugin, "
 "once the Site ID and Hashkey have been filled in."
@@ -39,67 +55,86 @@ msgstr ""
 "De CardGate betaalmethoden zijn alleen zichtbaar in WooCommerce, als de Site "
 "ID en Codeersleutel ingevuld zijn."
 
-#: cardgate.php:232
+#: cardgate.php:232 loco:675bf0eab9316b1ad60565d7
 msgid "CardGate Settings"
 msgstr "CardGate Instellingen"
 
-#: cardgate.php:242
+#: cardgate.php:242 loco:675bf0eab9316b1ad60565d8
 msgid "Mode"
 msgstr "Mode"
 
-#: cardgate.php:260
+#: cardgate.php:260 loco:675bf0eab9316b1ad60565d9
 msgid "Hash key"
 msgstr "Hash key"
 
-#: cardgate.php:274
+#: cardgate.php:274 loco:675bf0eab9316b1ad60565da
 msgid "API key"
 msgstr "API key"
 
-#: cardgate.php:281
+#: cardgate.php:281 loco:675bf0eab9316b1ad60565db
 msgid "Checkout display"
 msgstr "Checkout weergave"
 
-#: cardgate.php:285
+#: cardgate.php:285 loco:675bf0eab9316b1ad60565dc
 msgid "Without Logo"
 msgstr "Zonder logo"
 
-#: cardgate.php:286
+#: cardgate.php:286 loco:675bf0eab9316b1ad60565dd
 msgid "With Logo"
 msgstr "Met logo"
 
-#: cardgate.php:292 cardgate.php:829
+#: cardgate.php:293 loco:675bf0eab9316b1ad60565de
+msgid "Show ideal issuers"
+msgstr "Toon issuers (banken)"
+
+#: cardgate.php:297 loco:675bf0eab9316b1ad60565df
+msgid "Without issuers"
+msgstr "Zonder issuers"
+
+#: cardgate.php:298 loco:675bf0eab9316b1ad60565e0
+msgid "With issuers"
+msgstr "Met issuers"
+
+#: cardgate.php:300 loco:675bf0eab9316b1ad60565e1
+msgid ""
+"iDEAL v2 will not show issuers any more by default (Mandatory by iDEAL)."
+msgstr ""
+"iDEAL v2 laat standaard geen issuers (banken) meer zien (Verplicht door "
+"iDEAL)."
+
+#: cardgate.php:303 cardgate.php:829 loco:675bf0eab9316b1ad60565e2
 msgid "Use the "
 msgstr "Gebruik de"
 
-#: cardgate.php:292 cardgate.php:829
+#: cardgate.php:303 cardgate.php:829 loco:675bf0eab9316b1ad60565e3
 msgid "Settings button"
 msgstr "Instellingen knop"
 
-#: cardgate.php:292 cardgate.php:829
+#: cardgate.php:303 cardgate.php:829 loco:675bf0eab9316b1ad60565e4
 msgid "in your"
 msgstr "in uw"
 
-#: cardgate.php:292 cardgate.php:829
+#: cardgate.php:303 cardgate.php:829 loco:675bf0eab9316b1ad60565e5
 msgid "My CardGate"
 msgstr "Mijn CardGate"
 
-#: cardgate.php:292 cardgate.php:829
+#: cardgate.php:303 cardgate.php:829 loco:675bf0eab9316b1ad60565e6
 msgid "to set these values, as explained in the"
 msgstr "om deze waarden in te stellen, zoals uitgelegd in de"
 
-#: cardgate.php:292 cardgate.php:829
+#: cardgate.php:292 cardgate.php:829 loco:675bf0eab9316b1ad60565e7
 msgid "README.md"
 msgstr "README_NL.md"
 
-#: cardgate.php:292 cardgate.php:829
+#: cardgate.php:303 cardgate.php:829 loco:675bf0eab9316b1ad60565e8
 msgid "installation instructions"
 msgstr "installatie instructies"
 
-#: cardgate.php:292 cardgate.php:829
+#: cardgate.php:303 cardgate.php:829 loco:675bf0eab9316b1ad60565e9
 msgid "of this plugin"
 msgstr "van deze plugin"
 
-#: cardgate.php:295
+#: cardgate.php:295 loco:675bf0eab9316b1ad60565ea
 msgid ""
 "These settings apply to all CardGate payment methods used in the WooCommerce "
 "plugin."
@@ -107,132 +142,137 @@ msgstr ""
 "Deze instellingen hebben betrekking op alle CardGate betaalmethoden die "
 "gebruikt worden in Woocommerce."
 
-#: cardgate.php:328
+#: cardgate.php:328 loco:675bf0eab9316b1ad60565eb
 msgid "CardGate Payments"
 msgstr "CardGate Betalingen"
 
-#: cardgate.php:334
+#: cardgate.php:334 loco:675bf0eab9316b1ad60565ec
 msgid "Search Payments"
 msgstr "Doorzoek Betalingen"
 
-#: cardgate.php:357
+#: cardgate.php:357 loco:675bf0eab9316b1ad60565ed
 msgid "Settings"
 msgstr "Instellingen"
 
-#: cardgate.php:362
+#: cardgate.php:362 loco:675bf0eab9316b1ad60565ee
 msgid "Payments Table"
 msgstr "Betalingen tabel"
 
-#: cardgate.php:518
+#: cardgate.php:518 loco:675bf0eab9316b1ad60565ef
 msgid "Your payment has failed. Please choose an other payment method."
 msgstr "Uw betaling is niet voltooid. Kies een andere betaalmehode a.u.b."
 
 #: cardgate.php:547 classes/CGP_Common_Gateway.php:105
+#: loco:675bf0eab9316b1ad60565f0
 msgid "Title"
 msgstr "Titel"
 
-#: cardgate.php:557
+#: cardgate.php:557 loco:675bf0eab9316b1ad60565f1
 msgid "Slug"
 msgstr "Slug"
 
-#: cardgate.php:567
+#: cardgate.php:567 loco:675bf0eab9316b1ad60565f2
 msgid "Content"
 msgstr "Inhoud"
 
-#: cardgate.php:715
+#: cardgate.php:715 loco:675bf0eab9316b1ad60565f3
 msgid "Add Extra Fees"
 msgstr "Voeg extra kosten toe"
 
-#: cardgate.php:717
+#: cardgate.php:717 loco:675bf0eab9316b1ad60565f4
 msgid "Extra Fee"
 msgstr "Extra kosten"
 
-#: cardgate.php:724
+#: cardgate.php:724 loco:675bf0eab9316b1ad60565f5
 msgid "Label for Extra Fee"
 msgstr "Label voor Extra Kosten"
 
-#: cardgate.php:727
+#: cardgate.php:727 loco:675bf0eab9316b1ad60565f6
 msgid "My Custom Label"
 msgstr "Mijn aangepaste label"
 
-#: cardgate.php:730
+#: cardgate.php:730 loco:675bf0eab9316b1ad60565f7
 msgid "Fee type"
 msgstr "Kostenberekening"
 
-#: cardgate.php:733
+#: cardgate.php:733 loco:675bf0eab9316b1ad60565f8
 msgid "Add Fee to Total"
 msgstr "Tel op bij het Totaal"
 
-#: cardgate.php:734
+#: cardgate.php:734 loco:675bf0eab9316b1ad60565f9
 msgid "Percentage of Total"
 msgstr "Percentage van het Totaal"
 
-#: classes/Cardgate_PaymentsListTable.php:111
+#: classes/Cardgate_PaymentsListTable.php:111 loco:675bf0eab9316b1ad60565fa
 msgid "No payments found."
 msgstr "Geen betalingen gevonden."
 
-#: classes/Cardgate_PaymentsListTable.php:120
+#: classes/Cardgate_PaymentsListTable.php:120 loco:675bf0eab9316b1ad60565fb
 msgid "Date"
 msgstr "Datum"
 
-#: classes/Cardgate_PaymentsListTable.php:122
+#: classes/Cardgate_PaymentsListTable.php:122 loco:675bf0eab9316b1ad60565fc
 msgid "Transaction ID"
 msgstr "Transactie ID"
 
-#: classes/Cardgate_PaymentsListTable.php:123
+#: classes/Cardgate_PaymentsListTable.php:123 loco:675bf0eab9316b1ad60565fd
 msgid "Customer Name"
 msgstr "Klant naam"
 
-#: classes/Cardgate_PaymentsListTable.php:124
+#: classes/Cardgate_PaymentsListTable.php:124 loco:675bf0eab9316b1ad60565fe
 msgid "Amount"
 msgstr "Bedrag"
 
-#: classes/Cardgate_PaymentsListTable.php:125
+#: classes/Cardgate_PaymentsListTable.php:125 loco:675bf0eab9316b1ad60565ff
 msgid "Payment Status"
 msgstr "Betaal Status"
 
-#: classes/Cardgate_PaymentsListTable.php:298
+#: classes/Cardgate_PaymentsListTable.php:298 loco:675bf0eab9316b1ad6056600
 msgid "of"
 msgstr "van"
 
-#: classes/CGP_Common_Gateway.php:46
-msgid "Bank Option"
+#: classes/CGP_Common_Gateway.php:69
+msgid "Bank Options"
 msgstr "Bank Opties"
 
-#: classes/CGP_Common_Gateway.php:99
+#: classes/CGP_Common_Gateway.php:71
+msgid "Choose Bank"
+msgstr "Kies uw bank"
+
+#: classes/CGP_Common_Gateway.php:99 loco:675bf0eab9316b1ad6056602
 msgid "Enable/Disable"
 msgstr "Inschakelen/uitschakelen"
 
-#: classes/CGP_Common_Gateway.php:107
+#: classes/CGP_Common_Gateway.php:145 loco:675bf0eab9316b1ad6056603
+msgid "Enable "
+msgstr "Inschakelen"
+
+#: classes/CGP_Common_Gateway.php:107 loco:675bf0eab9316b1ad6056604
 msgid "Payment method title that the customer will see on your checkout."
 msgstr "Titel van de betaalmethode die de klant ziet tijdens het afrekenen."
 
-#: classes/CGP_Common_Gateway.php:112
+#: classes/CGP_Common_Gateway.php:112 loco:675bf0eab9316b1ad6056605
 msgid "Description"
 msgstr "Beschrijving"
 
-#: classes/CGP_Common_Gateway.php:114
+#: classes/CGP_Common_Gateway.php:114 loco:675bf0eab9316b1ad6056606
 msgid "Payment method description that the customer will see on your website."
 msgstr "Omschrijving van de betaalmethode die de klant ziet op je website."
 
-#: classes/CGP_Common_Gateway.php:115
+#: classes/CGP_Common_Gateway.php:159 loco:675bf0eab9316b1ad6056607
 msgid "Pay with "
 msgstr "Betaal met "
 
-#: classes/CGP_Common_Gateway.php:556
+#: classes/CGP_Common_Gateway.php:163 loco:675bf0eab9316b1ad6056608
+msgid "Instructions"
+msgstr "Instructies"
+
+#: classes/CGP_Common_Gateway.php:165 loco:675bf0eab9316b1ad6056609
+msgid "Instructions that will be added to the thank you page."
+msgstr "Instructies die worden toegevoegd aan de bedankt pagina"
+
+#: classes/CGP_Common_Gateway.php:821
+#: classes/CGP_Common_Gateway.php:828
+#: classes/woocommerce-blocks/ideal/build/index.js:1
 msgid " Choose your bank first, please"
 msgstr " Kies eerst uw bank a.u.b"
-
-#. Plugin Name of the plugin/theme
-#. Author of the plugin/theme
-msgid "CardGate"
-msgstr "CardGate"
-
-#. Description of the plugin/theme
-msgid "Integrates Cardgate Gateway for WooCommerce into WordPress"
-msgstr "Integratie van CardGate Gateway voor WooCommerce in WordPress"
-
-#. Plugin URI of the plugin/theme
-#. Author URI of the plugin/theme
-msgid "http://cardgate.com"
-msgstr "http://cardgate.com"

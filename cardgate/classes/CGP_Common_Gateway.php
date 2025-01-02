@@ -42,7 +42,10 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		if ( $this->description ) {
 			echo wpautop( wptexturize( $this->description ) );
 		}
-		if ( $this->has_fields ) {
+		if (
+            $this->has_fields
+            && get_option( 'cgp_checkoutidealissuers' ) == '1'
+        ) {
 			$this->generate_bank_html();
 		}
 	}
@@ -56,19 +59,16 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
         }
     }
 
-	// ////////////////////////////////////////////////
-
 	/**
 	 * Generate the bank options
 	 */
 	public function generate_bank_html() {
 		$aIssuers = $this->getBankOptions();
-
 		$html = '<fieldset>
                 <p class="form-row form-row-first ">
-                <label for="cc-expire-month">' . __( 'Bank Option', 'cardgate' ) . '<span class="required">*</span></label>';
+                <label for="cc-expire-month">' . __( 'Bank Options', 'cardgate' ) . '</label>';
 		$html .= '<select name="cgp_bank_options" id="cgp_bank_options" class="woocommerce-select">';
-		$html .= '<option value="0">Kies uw bank</option>';
+		$html .= '<option value="0">' . __( 'Choose Bank', 'cardgate' ) . '</option>';
 		foreach ( $aIssuers as $id => $name ) {
 			$html .= '<option value="' . $id;
 			$html .= ( ( isset( $this->bankOption ) && $id == $this->bankOption ) ? ' selected="selected" ' : '' );
@@ -230,7 +230,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 
 			// Configure payment option.
 			$oTransaction->setPaymentMethod( $this->payment_method );
-			if ( $this->payment_method == 'ideal' ) {
+			if ( $this->payment_method == 'ideal' && get_option('cgp_checkoutidealissuers') == '1') {
 				$oTransaction->setIssuer( $this->bankOption );
 			}
 
@@ -816,14 +816,14 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	 */
 	public function validate_fields() {
 		global $woocommerce;
-		if (key_exists('wc-cardgateideal-new-payment-method',$_POST)) {
+		if ( key_exists('wc-cardgateideal-new-payment-method', $_POST) && get_option('cgp_checkoutidealissuers') == '1' ) {
 			if ( empty( $_POST['cardgateideal_issuer'] ) || $_POST['cardgateideal_issuer'] == '0' ) {
 				wc_add_notice( __( ' Choose your bank first, please', 'cardgate' ), 'error' );
 				return false;
 			} else {
 				$this->bankOption = $_POST['cardgateideal_issuer'];
 			}
-		} elseif (key_exists('payment_method', $_POST) &&  $_POST['payment_method'] == 'cardgateideal' ) {
+		} elseif ( key_exists('payment_method', $_POST) && $_POST['payment_method'] == 'cardgateideal' && get_option('cgp_checkoutidealissuers') == '1' ) {
 			if ( empty( $_POST['cgp_bank_options'] ) || $_POST['cgp_bank_options'] == '0' ) {
 				wc_add_notice( __( ' Choose your bank first, please', 'cardgate' ), 'error' );
 				return false;
