@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 3.2.2
+ * Version: 3.2.3
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
@@ -194,7 +194,8 @@ class cardgate {
                 update_option('cgp_merchant_id', trim($_POST['cgp_merchant_id']));
                 update_option('cgp_merchant_api_key', $_POST['cgp_merchant_api_key']);
                 update_option('cgp_checkoutdisplay', $_POST['cgp_checkoutdisplay']);
-               
+                update_option('cgp_checkoutidealissuers', $_POST['cgp_checkoutidealissuers']);
+
                 //This wil refresh the bank issuer cache
                 update_option('IssuerRefresh', 0, true);
                 
@@ -235,7 +236,6 @@ class cardgate {
                     <tr>
                         <th scope="row">&nbsp</th>
                             <td colspan="2">&nbsp</td>
-
                     </tr>
                     <tr>
                         <th scope="row">
@@ -288,6 +288,18 @@ class cardgate {
                         </td>
                     </tr>
                     <tr>
+                        <th scope="row">
+                        <label for="cgp_checkoutidealissuers"><?php echo __('Show ideal issuers', 'cardgate') ?></label>
+                        </th>
+                        <td>
+                                <select style="width:140px;" id="cgp_checkoutidealissuers" name="cgp_checkoutidealissuers">
+                                    <option value="0"<?php echo (get_option('cgp_checkoutidealissuers') == '0' ? ('selected="selected"') : '') ?> > <?php echo __('Without issuers','cardgate')?></option>
+                                    <option value="1"<?php echo (get_option('cgp_checkoutidealissuers') == '1' ? ('selected="selected"') : '') ?> > <?php echo __('With issuers','cardgate') ?></option>
+                                </select><br>
+                            <?php echo __('iDEAL v2 will not show issuers any more by default (Mandatory by iDEAL).', 'cardgate') ?>
+                        </td>
+                    </tr>
+                    <tr>
                         <td colspan="2"><?php sprintf('%s <b>%s</b> %s <a href="https://my.cardgate.com/">%s </a> &nbsp %s <a href="https://github.com/cardgate/woocommerce/blob/master/%s" target="_blank"> %s</a> %s.'
             , __('Use the ','cardgate'),  __('Settings button', 'cardgate'), __('in your','cardgate'), __('My CardGate','cardgate'), __('to set these values, as explained in the','cardgate'),__('README.md','cardgate'), __('installation instructions','cardgate'), __('of this plugin','cardgate'))?></td>
                     </tr>
@@ -317,7 +329,6 @@ class cardgate {
     static function cardgate_payments_table() {
 	    require_once 'classes/Cardgate_PaymentsListTable.php';
         global $wp_list_table;
-
         $wp_list_table = new Cardgate_PaymentsListTable();
         $icon_file = plugins_url('images/cardgate.png', __FILE__);
         $wp_list_table->prepare_items();
