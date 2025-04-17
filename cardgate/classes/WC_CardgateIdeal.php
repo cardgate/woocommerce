@@ -18,7 +18,7 @@ class WC_CardgateIdeal extends CGP_Common_Gateway {
     var $payment_method = 'ideal';
     var $company = 'CardGate';
 	public $supports = ['products', 'refunds'];
-    var $has_fields = true; //extra field for bank data
+    var $has_fields = false; // no more bank field
     
     public function __construct() {
 	    parent::__construct();

@@ -62,9 +62,7 @@ final class IdealCardgate extends AbstractPaymentMethodType {
 			'instructions'                      => isset( $this->settings['instructions'] ) ? $this->settings['instructions'] : '',
 			'icon'                              => $this->iconpath.'ideal.svg',
 			'show_icon'                         => $this->settings['show_icon'],
-            'show_issuers'                      => $this->settings['show_issuers'],
 			'supports'                          => ['products'],
-			'issuers'                           => $this->settings['issuers'],
 			'feeUrl'                            => $this->settings['feeUrl'],
 		);
 	}
@@ -74,25 +72,6 @@ final class IdealCardgate extends AbstractPaymentMethodType {
 		$use_icon = get_option('cgp_checkoutdisplay');
 		$settings['show_icon'] = ($use_icon == 'withlogo');
 		$settings['show_issuers'] = false;
-        $aIssuers = [];
-
-        if ( get_option( 'cgp_checkoutidealissuers' ) == '1' ) {
-            $settings['show_issuers'] = true;
-		    $settings['issuers'] = get_option( 'sIssuers' );
-
-            $aIssuers[] = [ 'value' => '', 'name' => __( 'Choose Bank', 'cardgate' )];
-            $availableGateways = WC()->payment_gateways()->get_available_payment_gateways();
-            foreach ($availableGateways as $key => $gateway) {
-                if ( $key == 'cardgateideal' ) {
-                    $issuers = $gateway->getBankoptions();
-                    foreach ( $issuers as $key => $value ) {
-                        $aIssuers[] = [ 'value' => $key, 'name' => $value ];
-                    }
-                }
-            }
-        }
-
-		$settings['issuers'] = json_encode(($aIssuers));
 		$settings['feeUrl'] =  admin_url('admin-ajax.php');
 		return $settings;
 	}
