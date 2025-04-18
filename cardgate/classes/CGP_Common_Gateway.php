@@ -151,9 +151,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 
 			// Configure payment option.
 			$oTransaction->setPaymentMethod( $this->payment_method );
-			if ( $this->payment_method == 'ideal' && get_option('cgp_checkoutidealissuers') == '1') {
-				$oTransaction->setIssuer( $this->bankOption );
-			}
 
 			method_exists( $oOrder, 'get_billing_email' ) ? $billing_email = $oOrder->get_billing_email() : $billing_email = $oOrder->billing_email;
 			method_exists( $oOrder, 'get_billing_phone' ) ? $billing_phone = $oOrder->get_billing_phone() : $billing_phone = $oOrder->billing_phone;
