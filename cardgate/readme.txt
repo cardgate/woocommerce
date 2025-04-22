@@ -74,6 +74,9 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 
 == Changelog ==
 
+= 3.2.4 =
+* Update : Removed all issuer code
+
 = 3.2.3 =
 * Added: iDEAL issuer options
 
