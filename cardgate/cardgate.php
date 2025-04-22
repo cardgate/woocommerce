@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 3.2.3
+ * Version: 3.2.4
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
@@ -194,10 +194,6 @@ class cardgate {
                 update_option('cgp_merchant_id', trim($_POST['cgp_merchant_id']));
                 update_option('cgp_merchant_api_key', $_POST['cgp_merchant_api_key']);
                 update_option('cgp_checkoutdisplay', $_POST['cgp_checkoutdisplay']);
-                update_option('cgp_checkoutidealissuers', $_POST['cgp_checkoutidealissuers']);
-
-                //This wil refresh the bank issuer cache
-                update_option('IssuerRefresh', 0, true);
                 
                 $bIsTest = ($_POST['cgp_mode'] == 1 ? TRUE : FALSE);
                 $iMerchantId = (int) $_POST['cgp_merchant_id'];
@@ -285,18 +281,6 @@ class cardgate {
                                     <option value="withoutlogo"<?php echo (get_option('cgp_checkoutdisplay') == 'withoutlogo' ? ('selected="selected"') : '') ?> > <?php echo __('Without Logo','cardgate')?></option>
                                     <option value="withlogo"<?php echo (get_option('cgp_checkoutdisplay') == 'withlogo' ? ('selected="selected"') : '') ?> > <?php echo __('With Logo','cardgate') ?></option>
                                 </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">
-                        <label for="cgp_checkoutidealissuers"><?php echo __('Show ideal issuers', 'cardgate') ?></label>
-                        </th>
-                        <td>
-                                <select style="width:140px;" id="cgp_checkoutidealissuers" name="cgp_checkoutidealissuers">
-                                    <option value="0"<?php echo (get_option('cgp_checkoutidealissuers') == '0' ? ('selected="selected"') : '') ?> > <?php echo __('Without issuers','cardgate')?></option>
-                                    <option value="1"<?php echo (get_option('cgp_checkoutidealissuers') == '1' ? ('selected="selected"') : '') ?> > <?php echo __('With issuers','cardgate') ?></option>
-                                </select><br>
-                            <?php echo __('iDEAL v2 will not show issuers any more by default (Mandatory by iDEAL).', 'cardgate') ?>
                         </td>
                     </tr>
                     <tr>
