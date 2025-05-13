@@ -11,7 +11,7 @@
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
  * WC requires at least: 3.0.0
- * WC tested up to: 8.6.1
+ * WC tested up to: 9.8.4
  * License: GPLv3 or later
  */
 
@@ -59,12 +59,12 @@ class cardgate {
 
 
 	    add_action('admin_head', array($this,'add_cgform_fields'));
-	    add_action('woocommerce_cart_calculate_fees', array($this,'calculate_totals'));
+	    add_action('woocommerce_cart_calculate_fees', array($this,'calculate_fees'),1);
         add_action('wp_enqueue_scripts', array($this,'load_cg_script'),10, 1);
         add_action('admin_menu', array(&$this,'CGPAdminMenu'));
         add_action('init', array(&$this,'cardgate_callback'), 20);
 	    add_action( 'woocommerce_blocks_loaded', array($this,'woocommerce_cardgate_blocks_support' ));
-	    add_action('wp_loaded', array($this,'cardgate_checkout_fees'));
+	 //   add_action('wp_loaded', array($this,'cardgate_checkout_fees'));
 
         register_activation_hook(__FILE__, array(&$this,'cardgate_install')); // hook for install
         register_deactivation_hook(__FILE__, array(&$this,'cardgate_uninstall')); // hook for uninstall
@@ -729,7 +729,7 @@ class cardgate {
 <?php
         }
     }
-    public function calculate_totals($totals) {
+    public function calculate_fees($totals) {
         global $woocommerce;
 
         $woocommerce->session->extra_cart_fee = 0;
@@ -748,6 +748,9 @@ class cardgate {
 
         if ($current_gateway != '') {
             $current_gateway_id = $current_gateway->id;
+            if(strpos($current_gateway_id, 'cardgate') === false){
+                return $totals;
+            }
             $extra_charges_id = 'woocommerce_' . $current_gateway_id . '_extra_charges';
             $extra_charges_type = $extra_charges_id . '_type';
             $extra_charges_cust = $extra_charges_id . '_label';
@@ -830,99 +833,6 @@ class cardgate {
                 };
 		    }
 	    );
-    }
-
-    public function cardgate_checkout_fees() {
-        global $woocommerce;
-        if ( isset( $_POST ) && $this->is_ajax_block_update( $_POST ) ) {
-		    $method             = $_POST['method'];
-            $feeData            = $this->getFeeData($method);
-
-		    $this->cartRemoveFee( $feeData['label'] );
-		    $newTotal           = (float) $woocommerce->cart->get_totals()['total'];
-		    $totalTax           = $woocommerce->cart->get_totals()['total_tax'];
-		    $noSurchargeData    = [
-
-			    'amount' => false,
-			    'name' => '',
-			    'currency' => get_woocommerce_currency_symbol(),
-			    'newTotal' => $newTotal,
-			    'totalTax' => $totalTax,
-		    ];
-		    if (!$feeData['fee'] || $feeData['fee'] == 0) {
-			    wp_send_json_success($noSurchargeData);
-			    return;
-		    }
-
-		    $feeAmount  = $feeData['fee'];
-		    $label      = $feeData['label'];
-	        add_action('woocommerce_cart_calculate_fees', static function () use ($label, $feeAmount) {
-		        global $woocommerce;
-		        $woocommerce->cart->add_fee($label, $feeAmount, true, 'standard');
-	        });
-
-            //add global woocommerce.
-
-		    $woocommerce->cart->calculate_totals();
-
-		    $feeAmountTaxed = (float) $woocommerce->cart->get_totals()['fee_total'];
-		    $taxDisplayMode = get_option('woocommerce_tax_display_shop');
-		    if ($taxDisplayMode === 'incl') {
-			    $feeAmountTaxed = $feeAmountTaxed + (float) $woocommerce->cart->get_totals()['fee_tax'];
-		    }
-		    $newTotal = (float) $woocommerce->cart->get_totals()['total'];
-		    $totalTax = $woocommerce->cart->get_totals()['total_tax'];
-		    $data = [
-			    'amount' => $feeAmountTaxed,
-			    'name' => $feeData['label'],
-			    'currency' => get_woocommerce_currency_symbol(),
-			    'newTotal' => $newTotal,
-			    'totalTax' => $totalTax,
-			    'cart' => $woocommerce->cart->get_totals(),
-		    ];
-
-		    wp_send_json_success($data);
-	    }
-    }
-	protected function cartRemoveFee($label)
-	{
-		add_action('woocommerce_before_calculate_totals', static function () use ($label) {
-			$fees = WC()->cart->get_fees();
-			foreach ($fees as $key => $fee) {
-				if ($fees[$key]->name === $label) {
-					unset($fees[$key]);
-				}
-			}
-			WC()->cart->fees_api()->set_fees($fees);
-		});
-	}
-    protected function getFeeData($method) {
-        global $woocommerce;
-        $woocommerce->cart;
-	    $woocommerce->cart->calculate_totals();
-        $data = [];
-	    $fee = get_option('woocommerce_' . $method . '_extra_charges');
-        $fee = $fee == "" ? 0: $fee;
-	    $label = get_option( 'woocommerce_' . $method . '_extra_charges_label');
-	    $type = get_option('woocommerce_' . $method . '_extra_charges_type');
-	    if (isset($label) && strlen($label) > 2) {
-		    if ($type == 'percentage'){
-			    $label .= ' '. $fee.'%';
-		    }
-	    } else {
-		    $label .= '  Payment Charges ';
-	    }
-
-        if ($type == "percentage") {
-            $cart_total = (float) $woocommerce->cart->get_subtotal();
-            $payment_fee = ($cart_total * $fee) / 100;
-        } else {
-            $payment_fee = $fee;
-        }
-        $data['fee'] = $payment_fee;
-        $data['type'] = ($type == "percentage" ? $fee . '%' : 'Fixed');
-        $data['label'] = $label;
-        return $data;
     }
     public function set_plugin_url() {
         $this->plugin_url = untrailingslashit(plugins_url('/', __FILE__));

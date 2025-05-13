@@ -121,7 +121,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		global $woocommerce;
 		try {
 			$oOrder = new WC_Order( $iOrderId );
-            $this->correct_payment_fee($oOrder);
+         //   $this->correct_payment_fee($oOrder);
             $oOrder->calculate_totals(false);
             $oOrder->save();
 			$this->savePaymentData( $iOrderId );
