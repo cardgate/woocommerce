@@ -71,7 +71,6 @@ final class IdealCardgate extends AbstractPaymentMethodType {
 		$settings = get_option( 'woocommerce_cardgateideal_settings', [] );
 		$use_icon = get_option('cgp_checkoutdisplay');
 		$settings['show_icon'] = ($use_icon == 'withlogo');
-		$settings['show_issuers'] = false;
 		$settings['feeUrl'] =  admin_url('admin-ajax.php');
 		return $settings;
 	}

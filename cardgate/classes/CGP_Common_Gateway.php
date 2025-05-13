@@ -121,7 +121,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		global $woocommerce;
 		try {
 			$oOrder = new WC_Order( $iOrderId );
-         //   $this->correct_payment_fee($oOrder);
             $oOrder->calculate_totals(false);
             $oOrder->save();
 			$this->savePaymentData( $iOrderId );
@@ -300,106 +299,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			];
 		}
 	}
-
-    protected function correct_payment_fee(&$oOrder) {
-        if ($this->has_block_checkout()){
-	        $fees = $oOrder->get_fees();
-            $feeData = $this->getFeeData($oOrder->get_payment_method());
-	        $hasFee = array_key_exists('fee',$feeData) && $feeData['fee'] !== 0.0;
-            $correctedFee = false;
-	        foreach ($fees as $fee) {
-		        $feeName = $fee->get_name();
-		        $feeId = $fee->get_id();
-		        $hasCardgateFee = strpos($feeName, $feeData['label']) !== false;
-		        if ($hasCardgateFee) {
-			        if ($feeData['amount'] == (float)$fee->get_amount('edit')) {
-				        $correctedFee = true;
-				        continue;
-			        }
-			        if (!$correctedFee) {
-				        $this->removeOrderFee($oOrder, $feeId);
-				        $correctedFee = true;
-				        continue;
-			        }
-			        $this->removeOrderFee($oOrder, $feeId);
-			        $this->orderAddFee($oOrder, $feeData['fee'], $feeData['label']);
-			        $correctedFee = true;
-		        }
-	        }
-	        if (!$correctedFee) {
-		        if ($hasFee) {
-			        $this->orderAddFee($oOrder, $feeData['fee'], $feeData['label']);
-		        }
-	        }
-        }
-        if ($hasFee) {
-            $feeName = $feeData['label'];
-	        $this->setSessionfee( $oOrder, $feeName );
-        }
-        return $oOrder;
-    }
-
-    function setSessionFee($oOrder, $feeName){
-	    WC()->session->extra_cart_fee = WC()->session->extra_cart_fee_tax = 0;
-	    $aFees = $oOrder->get_fees();
-	    foreach($aFees as $fee){
-		    if($fee['name'] == $feeName){
-			    WC()->session->extra_cart_fee = $fee->get_total();
-			    WC()->session->extra_cart_fee_tax = $fee->get_total_tax();
-		    }
-	    }
-    }
-
-	protected function removeOrderFee(&$oOrder, int $feeId) {
-		$oOrder->remove_item($feeId);
-		wc_delete_order_item($feeId);
-		$oOrder->calculate_totals();
-	}
-
-	protected function orderAddFee(&$oOrder, $amount, $feeName) {
-		$item_fee = new \WC_Order_Item_Fee();
-		$item_fee->set_name($feeName);
-		$item_fee->set_amount($amount);
-		$item_fee->set_total($amount);
-		$item_fee->set_tax_status(true);
-		$oOrder->add_item($item_fee);
-		$oOrder->calculate_totals();
-	}
-
-	protected function getFeeData($method) {
-		global $woocommerce;
-		$woocommerce->cart;
-		$woocommerce->cart->calculate_totals();
-		$data = [];
-		$fee = get_option('woocommerce_' . $method . '_extra_charges');
-		$fee = $fee == "" ? 0: $fee;
-		$label = get_option( 'woocommerce_' . $method . '_extra_charges_label');
-		$type = get_option('woocommerce_' . $method . '_extra_charges_type');
-		if (isset($label) && strlen($label) > 2) {
-			if ($type == 'percentage'){
-				$label .= ' '. $fee.'%';
-			}
-		} else {
-			$label= $this->current_gateway_title . '  Payment Charges ';
-		}
-
-		if ($type == "percentage") {
-			$cart_total = (float) $woocommerce->cart->get_subtotal('edit');
-			$payment_fee = ($cart_total * $fee) / 100;
-		} else {
-			$payment_fee = $fee;
-		}
-		$data['fee'] = $payment_fee;
-		$data['type'] = ($type == "percentage" ? $fee . '%' : 'Fixed');
-		$data['label'] = $label;
-		return $data;
-	}
-
-    public function has_block_checkout(){
-        $uses_blocks = class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType');
-	    $isClassicCheckout = isset($_REQUEST["wc-ajax"]) && $_REQUEST["wc-ajax"] === "checkout";
-        return ($uses_blocks && !$isClassicCheckout);
-    }
 
 	// ////////////////////////////////////////////////
 
