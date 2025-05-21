@@ -19,7 +19,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	var $bankOption;
 	var $logo;
 	var $bSeperateSalesTax;
-    var $instructions;
+	var $instructions;
 
 	// ////////////////////////////////////////////////
 	public function __construct() {
@@ -27,12 +27,12 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		$this->init_settings();
 		$this->title = (isset($this->settings['title']) && !empty($this->settings['title']) ? $this->settings['title'] : $this->payment_name);
 		$this->description = $this->settings['description'];
-        $this->instructions = (!empty($this->settings['instructions']) ? $this->settings['instructions'] : '');
+		$this->instructions = (!empty($this->settings['instructions']) ? $this->settings['instructions'] : '');
 
 		add_filter ( 'woocommerce_gateway_icon', array($this, 'modify_icon'), 20, 2 );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receiptPage' ) );
-        add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
+		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
 	}
 
 	/**
@@ -120,9 +120,11 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	public function process_payment( $iOrderId ) {
 		global $woocommerce;
 		try {
+            $cart = $woocommerce->cart;
 			$oOrder = new WC_Order( $iOrderId );
-            $oOrder->calculate_totals(false);
-            $oOrder->save();
+			$this->correct_payment_fee($oOrder);
+			$oOrder->calculate_totals(false);
+			$oOrder->save();
 			$this->savePaymentData( $iOrderId );
 
 			$iMerchantId     = ( get_option( 'cgp_merchant_id' ) ? get_option( 'cgp_merchant_id' ) : 0 );
@@ -298,6 +300,107 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 				'redirect' => wc_get_checkout_url()
 			];
 		}
+	}
+
+	protected function correct_payment_fee(&$oOrder) {
+		if ($this->has_block_checkout()){
+			$fees = $oOrder->get_fees();
+			$feeData = $this->getFeeData($oOrder->get_payment_method());
+			$hasFee = array_key_exists('fee',$feeData) && $feeData['fee'] !== 0.0;
+			$correctedFee = false;
+			foreach ($fees as $fee) {
+				$feeName = $fee->get_name();
+				$feeId = $fee->get_id();
+				$hasCardgateFee = strpos($feeName, $feeData['label']) !== false;
+				if ($hasCardgateFee) {
+					if ($feeData['amount'] == (float)$fee->get_amount('edit')) {
+						$correctedFee = true;
+						continue;
+					}
+					if (!$correctedFee) {
+						$this->removeOrderFee($oOrder, $feeId);
+						$correctedFee = true;
+						continue;
+					}
+					$this->removeOrderFee($oOrder, $feeId);
+					$this->orderAddFee($oOrder, $feeData['fee'], $feeData['label']);
+					$correctedFee = true;
+				}
+			}
+			if (!$correctedFee) {
+				if ($hasFee) {
+					$this->orderAddFee($oOrder, $feeData['fee'], $feeData['label']);
+				}
+			}
+		}
+
+        //forlegacy gateway
+        if ( $hasFee ) {
+            $feeName = $feeData['label'];
+            $this->setSessionfee( $oOrder, $feeName );
+        }
+
+		return $oOrder;
+	}
+
+	function setSessionFee($oOrder, $feeName){
+		WC()->session->extra_cart_fee = WC()->session->extra_cart_fee_tax = 0;
+		$aFees = $oOrder->get_fees();
+		foreach($aFees as $fee){
+			if($fee['name'] == $feeName){
+				WC()->session->extra_cart_fee = $fee->get_total();
+				WC()->session->extra_cart_fee_tax = $fee->get_total_tax();
+			}
+		}
+	}
+
+	protected function removeOrderFee(&$oOrder, int $feeId) {
+		$oOrder->remove_item($feeId);
+		wc_delete_order_item($feeId);
+		$oOrder->calculate_totals();
+	}
+
+	protected function orderAddFee(&$oOrder, $amount, $feeName) {
+		$item_fee = new \WC_Order_Item_Fee();
+		$item_fee->set_name($feeName);
+		$item_fee->set_amount($amount);
+		$item_fee->set_total($amount);
+		$oOrder->add_item($item_fee);
+	}
+
+	protected function getFeeData($method) {
+		global $woocommerce;
+		$woocommerce->cart->calculate_totals();
+		$data = [];
+		$fee = get_option('woocommerce_' . $method . '_extra_charges');
+		$fee = $fee == "" ? 0: $fee;
+		$label = get_option( 'woocommerce_' . $method . '_extra_charges_label');
+		$type = get_option('woocommerce_' . $method . '_extra_charges_type');
+		if (isset($label) && strlen($label) > 2) {
+			if ($type == 'percentage'){
+				$label .= ' '. $fee.'%';
+			}
+		} else {
+			$label= $this->current_gateway_title . '  Payment Charges ';
+		}
+
+		if ($type == "percentage") {
+			$cart_total = (float) $woocommerce->cart->get_subtotal('edit');
+			$payment_fee = ($cart_total * $fee) / 100;
+		} else {
+			$payment_fee = $fee;
+		}
+		$data['fee'] = $payment_fee;
+		$data['type'] = ($type == "percentage" ? $fee . '%' : 'Fixed');
+		$data['label'] = $label;
+        $data['tax_status'] = 'taxable';
+		return $data;
+	}
+
+	public function has_block_checkout(){
+		$uses_blocks = class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType');
+		$isClassicCheckout = isset($_REQUEST["wc-ajax"]) && $_REQUEST["wc-ajax"] === "checkout";
+		return ($uses_blocks && !$isClassicCheckout);
 	}
 
 	// ////////////////////////////////////////////////
@@ -755,4 +858,3 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		}
 	}
 }
-
