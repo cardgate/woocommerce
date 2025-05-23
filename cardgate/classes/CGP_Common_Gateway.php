@@ -20,6 +20,16 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	var $logo;
 	var $bSeperateSalesTax;
 	var $instructions;
+	protected $only_euro_payments = ['cardgateideal',
+		'cardgateidealqr',
+		'cardgatebancontact',
+		'cardgatebanktransfer',
+		'cardgaetebillink',
+		'cardgatesofortbanking',
+		'cardgatedirectdebit',
+		'cardgateonlineueberweisen',
+		'cardgatespraypay',
+	];
 
 	// ////////////////////////////////////////////////
 	public function __construct() {
@@ -33,6 +43,20 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receiptPage' ) );
 		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
+	}
+
+	/**
+	 * Check if the gateway is available for use.
+	 *
+	 * @return bool
+	 */
+	public function is_available() {
+		$is_available = ( 'yes' === $this->enabled );
+        $site_currency = get_woocommerce_currency() ;
+		if ( WC()->cart && $site_currency !== 'EUR' && in_array($this->id, $this->only_euro_payments)) {
+            $is_available = false;
+		}
+		return $is_available;
 	}
 
 	/**
