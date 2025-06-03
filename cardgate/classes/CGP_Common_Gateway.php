@@ -24,7 +24,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		'cardgateidealqr',
 		'cardgatebancontact',
 		'cardgatebanktransfer',
-		'cardgaetebillink',
+		'cardgatebillink',
 		'cardgatesofortbanking',
 		'cardgatedirectdebit',
 		'cardgateonlineueberweisen',
