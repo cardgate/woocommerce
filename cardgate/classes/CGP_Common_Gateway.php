@@ -20,16 +20,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	var $logo;
 	var $bSeperateSalesTax;
 	var $instructions;
-	protected $only_euro_payments = ['cardgateideal',
-		'cardgateidealqr',
-		'cardgatebancontact',
-		'cardgatebanktransfer',
-		'cardgatebillink',
-		'cardgatesofortbanking',
-		'cardgatedirectdebit',
-		'cardgateonlineueberweisen',
-		'cardgatespraypay',
-	];
 
 	// ////////////////////////////////////////////////
 	public function __construct() {
@@ -46,6 +36,32 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
+     *  Check if the currency is allowed for this payment method.
+	 *
+	 * @param $currency
+	 * @param $payment_method
+	 *
+	 * @return bool
+	 */
+    public function check_payment_currency($currency,$payment_method) {
+        $strictly_euro = in_array($payment_method,['cardgateideal',
+            'cardgateidealqr',
+            'cardgatebancontact',
+            'cardgatebanktransfer',
+            'cardgatebillink',
+            'cardgatesofortbanking',
+            'cardgatedirectdebit',
+            'cardgateonlineueberweisen',
+            'cardgatespraypay']);
+        if ($strictly_euro && $currency != 'EUR') return false;
+
+        $strictly_pln = in_array($payment_method,['cardgateprzelewy24']);
+        if ($strictly_pln && $currency != 'PLN') return false;
+
+        return true;
+    }
+
+	/**
 	 * Check if the gateway is available for use.
 	 *
 	 * @return bool
@@ -53,7 +69,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	public function is_available() {
 		$is_available = ( 'yes' === $this->enabled );
         $site_currency = get_woocommerce_currency() ;
-		if ( WC()->cart && $site_currency !== 'EUR' && in_array($this->id, $this->only_euro_payments)) {
+		if ( WC()->cart && !$this->check_payment_currency( $site_currency, $this->id ) ) {
             $is_available = false;
 		}
 		return $is_available;
