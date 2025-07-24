@@ -27,6 +27,7 @@ class cardgate {
                                 'Banktransfer',
                                 'Billink',
                                 'Bitcoin',
+                                'Crypto',
                                 'Creditcard',
                                 'DirectDebit',
                                 'Giftcard',
@@ -156,6 +157,7 @@ class cardgate {
             require_once 'classes/WC_CardgateBanktransfer.php';
             require_once 'classes/WC_CardgateBillink.php';
             require_once 'classes/WC_CardgateBitcoin.php';
+	        require_once 'classes/WC_CardgateCrypto.php';
             require_once 'classes/WC_CardgateCreditcard.php';
             require_once 'classes/WC_CardgateDirectDebit.php';
             require_once 'classes/WC_CardgateGiftcard.php';
@@ -809,6 +811,7 @@ class cardgate {
         require_once 'classes/woocommerce-blocks/banktransfer/BanktransferCardgate.php';
         require_once 'classes/woocommerce-blocks/billink/BillinkCardgate.php';
         require_once 'classes/woocommerce-blocks/bitcoin/BitcoinCardgate.php';
+	    require_once 'classes/woocommerce-blocks/crypto/CryptoCardgate.php';
         require_once 'classes/woocommerce-blocks/creditcard/CreditcardCardgate.php';
         require_once 'classes/woocommerce-blocks/directdebit/DirectDebitCardgate.php';
         require_once 'classes/woocommerce-blocks/giftcard/GiftcardCardgate.php';
