@@ -4,7 +4,7 @@ Contributors: cardgate
 Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, MisterCash, SofortBanking, OverBoeking, PayPal, DirectDebit, Webmoney
 Requires at least: 4.4
 Tested up to: 6.8
-Stable tag: 3.2.6
+Stable tag: 3.2.7
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -73,6 +73,9 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 3. Payment settings for a specific CardGate payment method.
 
 == Changelog ==
+
+= 3.2.7 =
+* Added: Payment method Crypto
 
 = 3.2.6 =
 * Added: Currency check
