@@ -6,13 +6,14 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 3.2.7
+ * Version: 4.0.0
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
  * WC requires at least: 3.0.0
- * WC tested up to: 9.9.5
+ * WC tested up to: 10.0.4
  * License: GPLv3 or later
+ * Requires Plugins: woocommerce
  */
 
 require_once WP_PLUGIN_DIR . '/cardgate/cardgate-clientlib-php/init.php';
@@ -351,13 +352,6 @@ class cardgate {
         
         add_submenu_page($parentSlug = 'cardgate_menu', $pageTitle = __('Settings', 'cardgate'), $menuTitle = __('Settings', 'cardgate'), $capability = 'manage_options', $menuSlug = 'cardgate_menu', $function = array(
             __CLASS__, 'cardgate_config_page' ));
-        
-        add_submenu_page($parentSlug = 'cardgate_menu', $pageTitle = __('Payments Table', 'cardgate'), $menuTitle = __('Payments Table', 'cardgate'), $capability = 'manage_options', $menuSlug = 'cardgate_payments_table', $function = array(
-            __CLASS__,
-            'cardgate_payments_table'
-        ));
-        
-        global $submenu;
     }
 
     // ////////////////////////////////////////////////
@@ -450,44 +444,18 @@ class cardgate {
             if (! $this->hashCheck($_REQUEST, get_option('cgp_hashkey'), $bIsTest)) {
                 exit('HashCheck failed.');
             }
-            
-            // Refurbish the ref so we get the orderno
-            $sOrderType = substr($_REQUEST['reference'], 0, 1);
+
             $sOrderNo = (int) substr($_REQUEST['reference'], 11);
-            
-            // check if payment is still pending
-            $tableName = $wpdb->prefix . 'cardgate_payments';
-            $sql = $wpdb->prepare("SELECT * FROM $tableName WHERE order_id=%d", $sOrderNo);
-            
-            // Cause we also have recurring we need all records
-            $aDB_Row = $wpdb->get_results($sql, ARRAY_A);
-            // Get the last record
-            $aLastRow = end($aDB_Row);
-            
-            $sql = $wpdb->prepare("SELECT * FROM $tableName WHERE order_id=%d order by id desc ", $sOrderNo);
-            $aDB_Row = $wpdb->get_results($sql, ARRAY_A);
-            // Get the first record
-            $aFirstRow = end($aDB_Row);
-            if (is_null($aFirstRow['transaction_id'])) {
-                $sParent_id = $_REQUEST['transaction'];
-            } else {
-                $sParent_id = $aFirstRow['transaction_id'];
-            }
-            
+
             // process order
-            $order = new WC_Order($sOrderNo);
-            method_exists($order, 'get_status') ? $sOrderStatus = $order->get_status() : $sOrderStatus = $order->status;
-            
-            $amount = $order->get_total() * 100;
+            $order        = new WC_Order($sOrderNo);
+            $sOrderStatus = $order->get_status();
             
             if (($sOrderStatus != 'processing' && $sOrderStatus != 'completed')) {
                 if ($_REQUEST['code'] >= '200' && $_REQUEST['code'] < '300') {
-                    if (WC()->version >='3.0.0') {
-	                    $order->set_transaction_id( $_REQUEST['transaction'] );
-                    }
+                    $order->set_transaction_id( $_REQUEST['transaction'] );
                     $order->payment_complete();
                 }
-                // process order
                 
                 if ($_REQUEST['code'] == '0') {
                     $sReturnStatus = 'pending';
@@ -497,7 +465,6 @@ class cardgate {
                 }
                 if ($_REQUEST['code'] >= '300' && $_REQUEST['code'] < '400') {
                     $order->update_status('failed');
-                    
                     $sReturnStatus = 'failed';
                 }
                 if ($_REQUEST['code'] >= '700' && $_REQUEST['code'] < '800') {
@@ -506,13 +473,6 @@ class cardgate {
                 }
                 
                 $order->add_order_note('Curo transaction (' . $_REQUEST['transaction'] . ') payment ' . $sReturnStatus . '.');
-                
-                $sSubscription = (empty($_REQUEST['subscription']) ? 0 : $_REQUEST['subscription']);
-                // update payment table
-                if ($aLastRow['status'] == 'pending') {
-                    $qry = $wpdb->prepare("UPDATE $tableName SET status='" . $sReturnStatus . "', transaction_id='%s', parent_id='%s', subscription_id='%s' WHERE id=%d", $_REQUEST['transaction'], $sParent_id, $sSubscription, $aLastRow['id']);
-                    $wpdb->query($qry);
-                }
                 exit($_REQUEST['transaction'] . '.' . $_REQUEST['code']);
             } else {
                 exit('payment already processed');
