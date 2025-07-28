@@ -160,24 +160,16 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	public function process_payment( $iOrderId ) {
 		global $woocommerce;
 		try {
-            $cart = $woocommerce->cart;
-			$oOrder = new WC_Order( $iOrderId );
-			$this->correct_payment_fee($oOrder);
-			$oOrder->calculate_totals(false);
-			$oOrder->save();
-			$this->savePaymentData( $iOrderId );
-
+			$oOrder          = new WC_Order( $iOrderId );
 			$iMerchantId     = ( get_option( 'cgp_merchant_id' ) ? get_option( 'cgp_merchant_id' ) : 0 );
 			$sMerchantApiKey = ( get_option( 'cgp_merchant_api_key' ) ? get_option( 'cgp_merchant_api_key' ) : 0 );
 			$bIsTest         = ( get_option( 'cgp_mode' ) == 1 ? true : false );
 			$sLanguage       = substr( get_locale(), 0, 2 );
-
-			$sVersion = ( $this->get_woocommerce_version() == '' ? 'unkown' : $this->get_woocommerce_version() );
+            $sVersion        = ( $this->get_woocommerce_version() == '' ? 'unkown' : $this->get_woocommerce_version() );
 
 			$oCardGate = new cardgate\api\Client( (int) $iMerchantId, $sMerchantApiKey, $bIsTest );
 
 			$oCardGate->setIp( $_SERVER['REMOTE_ADDR'] );
-
 			$oCardGate->setLanguage( $sLanguage );
 			$oCardGate->version()->setPlatformName( 'Woocommerce' );
 			$oCardGate->version()->setPlatformVersion( $sVersion );
@@ -341,48 +333,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			];
 		}
 	}
-
-	protected function correct_payment_fee(&$oOrder) {
-		if ($this->has_block_checkout()){
-			$fees = $oOrder->get_fees();
-			$feeData = $this->getFeeData($oOrder->get_payment_method());
-			$hasFee = array_key_exists('fee',$feeData) && $feeData['fee'] !== 0.0;
-			$correctedFee = false;
-			foreach ($fees as $fee) {
-				$feeName = $fee->get_name();
-				$feeId = $fee->get_id();
-				$hasCardgateFee = strpos($feeName, $feeData['label']) !== false;
-				if ($hasCardgateFee) {
-					if ($feeData['amount'] == (float)$fee->get_amount('edit')) {
-						$correctedFee = true;
-						continue;
-					}
-					if (!$correctedFee) {
-						$this->removeOrderFee($oOrder, $feeId);
-						$correctedFee = true;
-						continue;
-					}
-					$this->removeOrderFee($oOrder, $feeId);
-					$this->orderAddFee($oOrder, $feeData['fee'], $feeData['label']);
-					$correctedFee = true;
-				}
-			}
-			if (!$correctedFee) {
-				if ($hasFee) {
-					$this->orderAddFee($oOrder, $feeData['fee'], $feeData['label']);
-				}
-			}
-		}
-
-        //forlegacy gateway
-        if ( $hasFee ) {
-            $feeName = $feeData['label'];
-            $this->setSessionfee( $oOrder, $feeName );
-        }
-
-		return $oOrder;
-	}
-
 	function setSessionFee($oOrder, $feeName){
 		WC()->session->extra_cart_fee = WC()->session->extra_cart_fee_tax = 0;
 		$aFees = $oOrder->get_fees();
