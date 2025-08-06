@@ -35,7 +35,6 @@ class cardgate {
                                 'Ideal',
                                 'Idealqr',
                                 'Klarna',
-                                'Mistercash',
                                 'Onlineueberweisen',
                                 'PayPal',
                                 'Paysafecard',
@@ -165,7 +164,6 @@ class cardgate {
             require_once 'classes/WC_CardgateIdeal.php';
             require_once 'classes/WC_CardgateIdealqr.php';
             require_once 'classes/WC_CardgateKlarna.php';
-            require_once 'classes/WC_CardgateMistercash.php';
             require_once 'classes/WC_CardgateOnlineueberweisen.php';
             require_once 'classes/WC_CardgatePayPal.php';
             require_once 'classes/WC_CardgatePaysafecard.php';
@@ -790,7 +788,6 @@ class cardgate {
 		    'woocommerce_blocks_payment_method_type_registration',
 		    function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
                 foreach ($this->payment_names as $name){
-                    if ($name == 'Mistercash') continue;
                     $blockmethod = $name.'Cardgate';
                     $payment_method_registry->register( new $blockmethod() );
                 };
