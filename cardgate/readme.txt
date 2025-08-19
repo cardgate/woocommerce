@@ -1,10 +1,10 @@
 === CardGate Payments for WooCommerce ===
 Plugin Name: CardGate Payments for WooCommerce
 Contributors: cardgate
-Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, MisterCash, SofortBanking, OverBoeking, PayPal, DirectDebit, Webmoney
+Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, Bancontact, SofortBanking, OverBoeking, PayPal, DirectDebit, Webmoney
 Requires at least: 4.4
 Tested up to: 6.8
-Stable tag: 4.0.0
+Stable tag: 4.0.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -26,7 +26,6 @@ This plug-in contains the following payment methods from CardGate for WooCommerc
 <li>iDEAL</li>
 <li>iDEAL QR</li>
 <li>Klarna</li>
-<li>MisterCash</li>
 <li>OnlineÜberweisen</li>
 <li>PayPal</li>
 <li>Paysafecard</li>
@@ -73,6 +72,9 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 3. Payment settings for a specific CardGate payment method.
 
 == Changelog ==
+
+= 4.0.1 =
+* Removed: MisterCash payment method.
 
 = 4.0.0 =
 * Added: Payment method Crypto
