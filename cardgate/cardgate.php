@@ -455,7 +455,7 @@ class cardgate {
                     $order->payment_complete();
                 }
                 
-                if ($_REQUEST['code'] == '0') {
+                if ($_REQUEST['code'] == '0' || $_REQUEST['code'] == '100') {
                     $sReturnStatus = 'pending';
                 }
                 if ($_REQUEST['code'] >= '200' && $_REQUEST['code'] < '300') {
