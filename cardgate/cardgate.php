@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 4.0.2
+ * Version: 4.0.1
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
@@ -454,8 +454,8 @@ class cardgate {
                     $order->set_transaction_id( $_REQUEST['transaction'] );
                     $order->payment_complete();
                 }
-
-                if ($_REQUEST['code'] == '0' || $_REQUEST['code'] == '100') {
+                
+                if ($_REQUEST['code'] == '0') {
                     $sReturnStatus = 'pending';
                 }
                 if ($_REQUEST['code'] >= '200' && $_REQUEST['code'] < '300') {
