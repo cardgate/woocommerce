@@ -463,7 +463,8 @@ class cardgate {
                     $sReturnStatus = 'pending';
                 }
 	            if ($code >= 100 && $code < 200) {
-		            $sReturnStatus = 'authorized';
+		            $order->update_status('on-hold');
+		            $sReturnStatus = 'authorization';
 	            }
                 if ($code >= 200 && $code < 300) {
                     $sReturnStatus = 'completed';
