@@ -11,7 +11,7 @@
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
  * WC requires at least: 3.0.0
- * WC tested up to: 10.1.0
+ * WC tested up to: 10.3.5
  * License: GPLv3 or later
  * Requires Plugins: woocommerce
  */
