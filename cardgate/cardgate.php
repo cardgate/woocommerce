@@ -6,12 +6,12 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 4.0.2
+ * Version: 4.0.3
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
  * WC requires at least: 3.0.0
- * WC tested up to: 10.1.0
+ * WC tested up to: 10.3.5
  * License: GPLv3 or later
  * Requires Plugins: woocommerce
  */
@@ -450,22 +450,26 @@ class cardgate {
             $sOrderStatus = $order->get_status();
             
             if (($sOrderStatus != 'processing' && $sOrderStatus != 'completed')) {
-                if ($_REQUEST['code'] >= '200' && $_REQUEST['code'] < '300') {
+
+                $code = (int)$_REQUEST['code'];
+
+                if ($code >= 200 && $code < 300) {
+                    // success
                     $order->set_transaction_id( $_REQUEST['transaction'] );
                     $order->payment_complete();
                 }
 
-                if ($_REQUEST['code'] == '0' || $_REQUEST['code'] == '100') {
+	            if ($_REQUEST['code'] == '0' || $_REQUEST['code'] == '100') {
                     $sReturnStatus = 'pending';
                 }
                 if ($_REQUEST['code'] >= '200' && $_REQUEST['code'] < '300') {
-                    $sReturnStatus = 'completed';
+                        $sReturnStatus = 'completed';
                 }
-                if ($_REQUEST['code'] >= '300' && $_REQUEST['code'] < '400') {
+                if ($code >= 300 && $code < 400) {
                     $order->update_status('failed');
                     $sReturnStatus = 'failed';
                 }
-                if ($_REQUEST['code'] >= '700' && $_REQUEST['code'] < '800') {
+                if ($code >= 700 && $code < 800) {
 	                $order->update_status('on-hold');
                     $sReturnStatus = 'waiting';
                 }
