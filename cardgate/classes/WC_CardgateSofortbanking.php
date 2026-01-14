@@ -5,22 +5,23 @@
  * Description:
  * Copyright: Copyright (c) 2012
  * Company: Cardgate
+ *
  * @author CardGate
  * @version 1.0
  */
 class WC_CardgateSofortbanking extends CGP_Common_Gateway {
-    
-    var $id = 'cardgatesofortbanking';
-    var $title = '';
-    var $method_title = 'Cardgate Sofortbanking';
-    var $admin_title = 'Cardgate Sofortbanking';
-    var $payment_name = 'Sofortbanking';
-    var $payment_method = 'sofortbanking';
-    var $company = 'CardGate';
-	public $supports = ['products', 'refunds'];
-    var $has_fields = false; //extra field for bank data
-  
-    public function __construct() {
-	    parent::__construct();
-    }
+
+	public $id             = 'cardgatesofortbanking';
+	public $title          = '';
+	public $method_title   = 'Cardgate Sofortbanking';
+	public $admin_title    = 'Cardgate Sofortbanking';
+	public $payment_name   = 'Sofortbanking';
+	public $payment_method = 'sofortbanking';
+	public $company        = 'CardGate';
+	public $supports    = array( 'products', 'refunds' );
+	public $has_fields     = false; // extra field for bank data
+
+	public function __construct() {
+		parent::__construct();
+	}
 }

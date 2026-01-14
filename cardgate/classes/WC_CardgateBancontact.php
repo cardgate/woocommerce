@@ -5,22 +5,23 @@
  * Description:
  * Copyright: Copyright (c) 2012
  * Company: Cardgate
+ *
  * @author CardGate
  * @version 1.0
  */
 class WC_CardgateBancontact extends CGP_Common_Gateway {
-    
-    var $id = 'cardgatebancontact';
-    var $title = '';
-    var $method_title = 'Cardgate Bancontact';
-    var $admin_title = 'Cardgate Bancontact';
-    var $payment_name = 'Bancontact';
-    var $payment_method = 'bancontact';
-    var $company = 'CardGate';
-	public $supports = ['products', 'refunds'];
-    var $has_fields = false; //extra field for bank data
 
-    public function __construct() {
-	    parent::__construct();
-    }
+	public $id             = 'cardgatebancontact';
+	public $title          = '';
+	public $method_title   = 'Cardgate Bancontact';
+	public $admin_title    = 'Cardgate Bancontact';
+	public $payment_name   = 'Bancontact';
+	public $payment_method = 'bancontact';
+	public $company        = 'CardGate';
+	public $supports    = array( 'products', 'refunds' );
+	public $has_fields     = false; // extra field for bank data
+
+	public function __construct() {
+		parent::__construct();
+	}
 }
