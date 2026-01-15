@@ -39,15 +39,15 @@ final class IdealCardgate extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_script_handles() {
-		$url = plugin_dir_url(__FILE__);
+		$url = plugin_dir_url( __FILE__ );
 		wp_register_script(
 			'wc_payment_method_cardgateideal',
 			$url . 'build/index.js',
-			[],
-			'1020349.' . wp_rand( 0, 9999 ) ,
+			array(),
+			'1020349.' . wp_rand( 0, 9999 ),
 			true
 		);
-		return [ 'wc_payment_method_cardgateideal' ];
+		return array( 'wc_payment_method_cardgateideal' );
 	}
 
 	/**
@@ -57,21 +57,21 @@ final class IdealCardgate extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_data() {
 		return array(
-			'title'                             => isset( $this->settings['title'] ) ? $this->settings['title'] : '',
-			'description'                       => isset( $this->settings['description'] ) ? $this->settings['description'] : '',
-			'instructions'                      => isset( $this->settings['instructions'] ) ? $this->settings['instructions'] : '',
-			'icon'                              => $this->iconpath.'ideal.svg',
-			'show_icon'                         => $this->settings['show_icon'],
-			'supports'                          => ['products'],
-			'feeUrl'                            => $this->settings['feeUrl'],
+			'title'        => isset( $this->settings['title'] ) ? $this->settings['title'] : '',
+			'description'  => isset( $this->settings['description'] ) ? $this->settings['description'] : '',
+			'instructions' => isset( $this->settings['instructions'] ) ? $this->settings['instructions'] : '',
+			'icon'         => $this->iconpath . 'ideal.svg',
+			'show_icon'    => $this->settings['show_icon'],
+			'supports'     => array( 'products' ),
+			'feeUrl'       => $this->settings['feeUrl'],
 		);
 	}
-	private function get_settings(){
+	private function get_settings() {
 
-		$settings = get_option( 'woocommerce_cardgateideal_settings', [] );
-		$use_icon = get_option('cgp_checkoutdisplay');
-		$settings['show_icon'] = ($use_icon == 'withlogo');
-		$settings['feeUrl'] =  admin_url('admin-ajax.php');
+		$settings              = get_option( 'woocommerce_cardgateideal_settings', array() );
+		$use_icon              = get_option( 'cgp_checkoutdisplay' );
+		$settings['show_icon'] = ( $use_icon == 'withlogo' );
+		$settings['feeUrl']    = admin_url( 'admin-ajax.php' );
 		return $settings;
 	}
 }
