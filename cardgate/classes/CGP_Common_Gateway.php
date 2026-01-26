@@ -853,21 +853,14 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			return $icon;
 		}
 
-		$payment_gateway = $payment_gateways[ $id ];
-		if ( isset( $payment_gateway->company ) && 'CardGate' === $payment_gateway->company ) {
-			$icon    = 'https://cdn.curopayments.net/images/paymentmethods/' . $this->payment_method . '.svg';
-			$img     = '<img style="max-width:40px; max-height:40px;float:right;" src="' . WC_HTTPS::force_https_url( esc_url( $icon ) ) . '" alt="' . esc_attr( $payment_gateway->get_title() ) . '" />';
-			$display = get_option( 'cgp_checkoutdisplay', 'withoutlogo' );
-			switch ( $display ) {
-				case 'withlogo':
-					$icon = $payment_gateway->get_title() . $img;
-					break;
-				case 'withoutlogo':
-				default:
-					$icon = $payment_gateway->get_title();
-					break;
-			}
-		}
-		return $icon;
+        $payment_gateway = $payment_gateways[ $id ];
+        if ( isset( $payment_gateway->company ) && 'CardGate' === $payment_gateway->company ) {
+            $icon_url = 'https://cdn.curopayments.net/images/paymentmethods/' . $this->payment_method . '.svg';
+            $icon     = '<img style="max-width:40px; max-height:40px;float:right;" src="' . WC_HTTPS::force_https_url( esc_url( $icon_url ) ) . '" alt="' . esc_attr( $payment_gateway->get_title() ) . '" />';
+            $display  = get_option( 'cgp_checkoutdisplay', 'withoutlogo' );
+            $icon     = $display === 'withoutlogo' ? '' : $icon;
+        }
+
+        return $icon;
 	}
 }
