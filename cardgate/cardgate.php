@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 4.1.1
+ * Version: 4.2.0
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
@@ -785,25 +785,18 @@ class Cardgate {
 					$data += '<fieldset>';
 					$data += '<input style="" name="<?php echo esc_attr( $extra_charges_label ); ?>" id="<?php echo esc_attr( $extra_charges_label ); ?>" type="text" value="<?php echo esc_attr( $extra_charges_cust ); ?>" placeholder="<?php echo esc_attr__( 'My Custom Label', 'cardgate' ); ?>"/>';
 					$data += '<br /></fieldset></td></tr>';
+
 					$data += '<tr vertical-align="top">';
 					$data += '<th scope="row" class="titledesc"><?php echo esc_html__( 'Fee type', 'cardgate' ); ?></th>';
 					$data += '<td class="forminp">';
 					$data += '<fieldset>';
-					$data += '<select name="<?php echo esc_attr( $extra_charges_type ); ?>"><option 
-					<?php
-					if ( 'add' === $extra_charges_type_value ) {
-						echo 'selected=selected';}
-					?>
-					value="add"><?php echo esc_html__( 'Add Fee to Total', 'cardgate' ); ?></option>';
-					$data += '<option 
-					<?php
-					if ( 'percentage' === $extra_charges_type_value ) {
-						echo 'selected=selected';}
-					?>
-					value="percentage"><?php echo esc_html__( 'Percentage of Total', 'cardgate' ); ?></option>';
-					$data += '<br /></fieldset></td></tr></table>';
+
+                    $data += '<select name="<?php echo $extra_charges_type?>"><option <?php if($extra_charges_type_value=="add") echo "selected=selected"?> value="add"><?php echo esc_html__('Add Fee to Total','cardgate');?></option>';
+                    $data += '<option <?php if($extra_charges_type_value=="percentage") echo "selected=selected"?> value="percentage"><?php echo esc_html__('Percentage of Total','cardgate');?></option>';
+                    $data += '<br /></fieldset></td></tr>';
+                    $data += '</table>';
 					$('.form-table:last').after($data);
-	
+
 				});
 	</script>
 			<?php
