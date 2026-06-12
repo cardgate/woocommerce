@@ -58,6 +58,38 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_receipt_' . $this->id, array( $this, 'receiptPage' ) );
 		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
+
+		if ( $this->subscriptions_enabled() ) {
+			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, array( $this, 'scheduled_subscription_payment' ), 10, 2 );
+		}
+	}
+
+	/**
+	 * Check if the WooCommerce Subscriptions plugin is active and this gateway supports subscriptions.
+	 *
+	 * @return bool
+	 */
+	public function subscriptions_enabled() {
+		return class_exists( 'WC_Subscriptions' ) && $this->supports( 'subscriptions' );
+	}
+
+	/**
+	 * Check if an order contains a subscription, or is a subscription payment method change.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return bool
+	 */
+	public function order_needs_recurring( $order_id ) {
+		if ( ! $this->subscriptions_enabled() ) {
+			return false;
+		}
+		if ( function_exists( 'wcs_order_contains_subscription' ) && wcs_order_contains_subscription( $order_id, array( 'parent', 'renewal', 'resubscribe', 'switch' ) ) ) {
+			return true;
+		}
+		if ( function_exists( 'wcs_is_subscription' ) && wcs_is_subscription( $order_id ) ) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -134,11 +166,12 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	 * Initialise Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
+        $label = __( 'Enable ' . $this->payment_name, 'cardgate' );
 		$this->form_fields = array(
 			'enabled'      => array(
 				'title'   => __( 'Enable/Disable', 'cardgate' ),
 				'type'    => 'checkbox',
-				'label'   => __( 'Enable ' . $this->payment_name, 'cardgate' ),
+				'label'   => __( $label, 'cardgate' ),
 				'default' => 'no',
 			),
 			'title'        => array(
@@ -214,6 +247,11 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 
 			// Configure payment option.
 			$transaction->setPaymentMethod( $this->payment_method );
+
+			// Flag the transaction for recurring use when the order contains a subscription.
+			if ( $this->order_needs_recurring( $order_id ) ) {
+				$transaction->setRecurring( true );
+			}
 
 			$billing_email      = $order->get_billing_email();
 			$billing_phone      = $order->get_billing_phone();
@@ -500,6 +538,86 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$order->add_order_note( 'Curo transaction (' . $result['refund']['transaction'] . ') Refund amount = ' . round( (int) round( $amount * 100 ) / 100, 2 ) . '.' );
 			return true;
 		}
+	}
+
+	/**
+	 * Process a scheduled subscription (renewal) payment.
+	 *
+	 * Triggered by WooCommerce Subscriptions via the
+	 * woocommerce_scheduled_subscription_payment_{gateway_id} action.
+	 *
+	 * @param float    $amount_to_charge The amount to charge.
+	 * @param WC_Order $renewal_order The renewal order to charge.
+	 */
+	public function scheduled_subscription_payment( $amount_to_charge, $renewal_order ) {
+		try {
+			$parent_transaction_id = $this->get_recurring_transaction_id( $renewal_order );
+			if ( empty( $parent_transaction_id ) ) {
+				throw new Exception( 'no CardGate transaction found to use for the recurring payment' );
+			}
+
+			$merchant_id      = ( get_option( 'cgp_merchant_id' ) ? get_option( 'cgp_merchant_id' ) : 0 );
+			$merchant_api_key = ( get_option( 'cgp_merchant_api_key' ) ? get_option( 'cgp_merchant_api_key' ) : 0 );
+			$is_test          = ( 1 === (int) get_option( 'cgp_mode' ) ? true : false );
+			$version          = ( '' === $this->get_woocommerce_version() ? 'unkown' : $this->get_woocommerce_version() );
+
+			$cardgate = new cardgate\api\Client( (int) $merchant_id, $merchant_api_key, $is_test );
+			$cardgate->setLanguage( substr( get_locale(), 0, 2 ) );
+			$cardgate->version()->setPlatformName( 'Woocommerce' );
+			$cardgate->version()->setPlatformVersion( $version );
+			$cardgate->version()->setPluginName( 'CardGate' );
+			$cardgate->version()->setPluginVersion( get_option( 'cardgate_version' ) );
+
+			$order_id    = $renewal_order->get_id();
+			$amount      = (int) round( $amount_to_charge * 100 );
+			$reference   = 'O' . time() . $order_id;
+			$description = 'Order ' . $this->swap_order_number( $order_id );
+
+			$parent_transaction = $cardgate->transactions()->get( $parent_transaction_id );
+			$new_transaction    = $parent_transaction->recur( $amount, $reference, $description );
+
+			$renewal_order->add_order_note(
+				sprintf( 'CardGate recurring payment processed (transaction %s).', $new_transaction->getId() )
+			);
+			$renewal_order->payment_complete( $new_transaction->getId() );
+		} catch ( Exception $e ) {
+			$renewal_order->update_status(
+				'failed',
+				sprintf( 'CardGate recurring payment failed: %s', $e->getMessage() )
+			);
+		}
+	}
+
+	/**
+	 * Find the CardGate transaction id to use for a recurring payment.
+	 *
+	 * Looks at the subscriptions related to the renewal order and returns the
+	 * transaction id of the original (parent) order.
+	 *
+	 * @param WC_Order $renewal_order The renewal order.
+	 * @return string|false
+	 */
+	private function get_recurring_transaction_id( $renewal_order ) {
+		if ( ! function_exists( 'wcs_get_subscriptions_for_renewal_order' ) ) {
+			return false;
+		}
+
+		$subscriptions = wcs_get_subscriptions_for_renewal_order( $renewal_order );
+		foreach ( $subscriptions as $subscription ) {
+			$transaction_id = $subscription->get_transaction_id();
+			if ( ! empty( $transaction_id ) ) {
+				return $transaction_id;
+			}
+			$parent_order = $subscription->get_parent();
+			if ( $parent_order ) {
+				$transaction_id = $parent_order->get_transaction_id();
+				if ( ! empty( $transaction_id ) ) {
+					return $transaction_id;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
