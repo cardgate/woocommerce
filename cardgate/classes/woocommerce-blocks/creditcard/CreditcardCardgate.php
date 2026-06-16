@@ -62,8 +62,22 @@ final class CreditcardCardgate extends AbstractPaymentMethodType {
 			'instructions' => isset( $this->settings['instructions'] ) ? $this->settings['instructions'] : '',
 			'icon'         => $this->iconpath . 'creditcard.svg',
 			'show_icon'    => $this->settings['show_icon'],
-			'supports'     => array( 'products' ),
+			'supports'     => $this->get_supported_features(),
 		);
+	}
+
+	/**
+	 * Returns an array of supported features, taken from the gateway so that
+	 * subscription support is exposed to the block checkout.
+	 *
+	 * @return string[]
+	 */
+	public function get_supported_features() {
+		$gateways = WC()->payment_gateways()->payment_gateways();
+		if ( isset( $gateways[ $this->name ] ) ) {
+			return array_filter( $gateways[ $this->name ]->supports, array( $gateways[ $this->name ], 'supports' ) );
+		}
+		return array( 'products' );
 	}
 	private function get_settings() {
 		$settings              = get_option( 'woocommerce_cardgatecreditcard_settings', array() );

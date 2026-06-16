@@ -18,7 +18,20 @@ class WC_CardgateDirectDebit extends CGP_Common_Gateway {
 	public $payment_name   = 'DirectDebit';
 	public $payment_method = 'directdebit';
 	public $company        = 'CardGate';
-	public $supports    = array( 'products', 'refunds' );
+	public $supports       = array(
+		'products',
+		'refunds',
+		'subscriptions',
+		'subscription_cancellation',
+		'subscription_suspension',
+		'subscription_reactivation',
+		'subscription_amount_changes',
+		'subscription_date_changes',
+		'subscription_payment_method_change',
+		'subscription_payment_method_change_customer',
+		'subscription_payment_method_change_admin',
+		'multiple_subscriptions',
+	);
 	public $has_fields     = false; // extra field for bank data
 
 	public function __construct() {
