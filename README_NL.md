@@ -85,7 +85,7 @@ alsook de **WooCommerce plug-in 2.1.x of hoger**.
 ## Abonnementen
 
 De CardGate plug-in ondersteunt **terugkerende betalingen** via de
-[WooCommerce Subscriptions](https://woocommerce.com/products/woocommerce-subscriptions/) plug-in.
+[WooCommerce Subscriptions](https://github.com/pronamic/woocommerce-subscriptions) plug-in.
 De abonnementsfunctionaliteit is alleen actief wanneer **WooCommerce Subscriptions geïnstalleerd en
 geactiveerd is**; zonder deze plug-in gedragen de CardGate betaalmethoden zich als gewone
 eenmalige betaalmethoden.
