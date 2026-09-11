@@ -85,7 +85,7 @@ and **WooCommerce plug-in 3.x or higher**.
 ## Subscriptions
 
 The CardGate plug-in supports **recurring payments** through the
-[WooCommerce Subscriptions](https://woocommerce.com/products/woocommerce-subscriptions/) plug-in.
+[WooCommerce Subscriptions](https://github.com/pronamic/woocommerce-subscriptions) plug-in.
 Subscription functionality is only active when **WooCommerce Subscriptions is installed and activated**;
 without it the CardGate payment methods behave as regular one-off payment methods.
 
