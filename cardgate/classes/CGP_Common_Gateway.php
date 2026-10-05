@@ -630,11 +630,34 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 				->get( $parent_transaction_id )
 				->recur( $amount, $reference, $description );
 
-			$renewal_order->set_transaction_id( $new_transaction->getId() );
+			// The cgp_notify callback for the new transaction may already have been
+			// handled while recur() was running, so reload the order to avoid
+			// overwriting a status set by the callback (e.g. processing).
+			$fresh_order = wc_get_order( $order_id );
+			if ( $fresh_order ) {
+				$renewal_order = $fresh_order;
+			}
+
 			$renewal_order->add_order_note(
 				sprintf( 'CardGate recurring transaction %s created; awaiting callback.', $new_transaction->getId() )
 			);
+
+			if ( $renewal_order->is_paid() ) {
+				// Callback already completed the payment; nothing left to do.
+				return;
+			}
+
+			$renewal_order->set_transaction_id( $new_transaction->getId() );
 			$this->store_recurring_transaction( $renewal_order, $parent_transaction_id );
+
+			// Re-check right before changing the status, the callback may have
+			// arrived in the meantime.
+			$fresh_order = wc_get_order( $order_id );
+			if ( $fresh_order && $fresh_order->is_paid() ) {
+				$renewal_order->save();
+				return;
+			}
+
 			$renewal_order->update_status( 'on-hold' );
 			$renewal_order->save();
 		} catch ( Exception $e ) {
@@ -657,7 +680,6 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 		if ( ! $this->subscriptions_enabled() || empty( $transaction_id ) ) {
 			return;
 		}
-
 		$order->update_meta_data( self::RECURRING_META, $transaction_id );
 		$order->save();
 
