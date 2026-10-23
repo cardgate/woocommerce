@@ -50,6 +50,11 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 	const RECURRING_META = '_cardgate_recurring_transaction';
 
 	/**
+	 * Meta key holding the CardGate reference of a transaction created by recur().
+	 */
+	const RECURRING_REFERENCE_META = '_cardgate_reference';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -623,7 +628,12 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$reference   = 'O' . time() . $order_id;                // must match the callback parser.
 			$description = 'Order ' . $this->swap_order_number( $order_id );
 
-			$renewal_order->update_meta_data( '_cardgate_reference', $reference );
+			// Persist the reference and the parent transaction before recur() is
+			// called: the cgp_notify callback for the new transaction can arrive
+			// while recur() is still running and must be able to recognise the
+			// transaction as a recurring child and keep the parent id.
+			$renewal_order->update_meta_data( self::RECURRING_REFERENCE_META, $reference );
+			$renewal_order->update_meta_data( self::RECURRING_META, $parent_transaction_id );
 			$renewal_order->save();
 
 			$new_transaction = $cardgate->transactions()
@@ -696,6 +706,33 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 			$subscription->set_payment_method( $this->id );
 			$subscription->save();
 		}
+	}
+
+	/**
+	 * Determine which transaction id must be stored for recurring payments when
+	 * a cgp_notify callback for a successful payment arrives.
+	 *
+	 * A transaction created by recur() is a child of the original (parent)
+	 * transaction and cannot be used as parent for the next recurring payment.
+	 * Such a transaction is recognised by the reference that was stored before
+	 * recur() was called; in that case the already stored parent id is kept.
+	 * For any other payment (initial order, manual payment of a renewal order,
+	 * payment method change) the new transaction id becomes the parent.
+	 *
+	 * @param WC_Order $order          Order the callback belongs to.
+	 * @param string   $transaction_id CardGate transaction id from the callback.
+	 * @param string   $reference      CardGate reference from the callback.
+	 * @return string
+	 */
+	public function get_recurring_transaction_for_callback( $order, $transaction_id, $reference ) {
+		$stored_reference = (string) $order->get_meta( self::RECURRING_REFERENCE_META );
+		$stored_parent    = (string) $order->get_meta( self::RECURRING_META );
+
+		if ( '' !== $stored_reference && $stored_reference === (string) $reference && '' !== $stored_parent ) {
+			return $stored_parent;
+		}
+
+		return (string) $transaction_id;
 	}
 
 	/**
