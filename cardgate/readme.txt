@@ -4,7 +4,7 @@ Contributors: cardgate
 Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, Bancontact, SofortBanking, OverBoeking, PayPal, DirectDebit, Webmoney
 Requires at least: 4.4
 Tested up to: 7.0
-Stable tag: 4.3.0
+Stable tag: 4.3.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -72,6 +72,10 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 3. Payment settings for a specific CardGate payment method.
 
 == Changelog ==
+
+= 4.3.1 =
+* Fix: Keep the original (parent) transaction on the subscription for recurring payments
+* Fix: Update order status check
 
 = 4.3.0 =
 * Fix: Update order status handling

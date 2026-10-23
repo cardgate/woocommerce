@@ -6,7 +6,7 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 4.3.0
+ * Version: 4.3.1
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
@@ -672,9 +672,12 @@ class Cardgate {
 
 			$transaction_id = sanitize_text_field( wp_unslash( $_REQUEST['transaction'] ) );
 
-			// Guard on the transaction id instead of the order status, so later
+            // Test if transaction is not recurring.
+            $not_recurring = (empty($_REQUEST['parent_transaction_id']) || $_REQUEST['parent_transaction_id'] == 'master')? true:false;
+
+            // Guard on the transaction id instead of the order status, so later
 			// status callbacks for renewal orders are still processed.
-			if ( $order->get_transaction_id() === $transaction_id && $order->is_paid() ) {
+			if ( $order->get_transaction_id() === $transaction_id && $order->is_paid() || ($not_recurring && $order->is_paid())) {
 				exit( 'payment already processed' );
 			}
 
@@ -690,7 +693,10 @@ class Cardgate {
 				$order->set_transaction_id( $transaction_id );
 				$gateway = wc_get_payment_gateway_by_order( $order );
 				if ( $gateway instanceof CGP_Common_Gateway ) {
-					$gateway->store_recurring_transaction( $order, $transaction_id );
+					// A transaction created by recur() must not replace the parent
+					// transaction on the subscription; only the parent can be recurred.
+					$recurring_transaction_id = $gateway->get_recurring_transaction_for_callback( $order, $transaction_id, $reference );
+					$gateway->store_recurring_transaction( $order, $recurring_transaction_id );
 				}
 				$order->payment_complete( $transaction_id );
 				$return_status = 'completed';
