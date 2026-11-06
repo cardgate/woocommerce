@@ -6,12 +6,12 @@
  * Description: Integrates Cardgate Gateway for WooCommerce into WordPress
  * Author: CardGate
  * Author URI: https://www.cardgate.com
- * Version: 4.3.1
+ * Version: 4.3.2
  * Text Domain: cardgate
  * Domain Path: /i18n/languages
  * Requires at least: 4.4
  * WC requires at least: 3.0.0
- * WC tested up to: 10.3.5
+ * WC tested up to: 11.2.2
  * License: GPLv3 or later
  * Requires Plugins: woocommerce
  *
@@ -206,11 +206,9 @@ class Cardgate {
 		'Ideal',
 		'Idealqr',
 		'Klarna',
-		'Onlineueberweisen',
 		'PayPal',
 		'Paysafecard',
 		'Przelewy24',
-		'Sofortbanking',
 		'Spraypay',
 	);
 	/**
@@ -337,12 +335,10 @@ class Cardgate {
 			require_once 'classes/WC_CardgateIdeal.php';
 			require_once 'classes/WC_CardgateIdealqr.php';
 			require_once 'classes/WC_CardgateKlarna.php';
-			require_once 'classes/WC_CardgateOnlineueberweisen.php';
 			require_once 'classes/WC_CardgatePayPal.php';
 			require_once 'classes/WC_CardgatePaysafecard.php';
 			require_once 'classes/WC_CardgatePaysafecash.php';
 			require_once 'classes/WC_CardgatePrzelewy24.php';
-			require_once 'classes/WC_CardgateSofortbanking.php';
 			require_once 'classes/WC_CardgateSpraypay.php';
 		}
 	}
@@ -1070,12 +1066,10 @@ class Cardgate {
 		require_once 'classes/woocommerce-blocks/ideal/IdealCardgate.php';
 		require_once 'classes/woocommerce-blocks/idealqr/IdealqrCardgate.php';
 		require_once 'classes/woocommerce-blocks/klarna/KlarnaCardgate.php';
-		require_once 'classes/woocommerce-blocks/onlineueberweisen/OnlineueberweisenCardgate.php';
 		require_once 'classes/woocommerce-blocks/paypal/PaypalCardgate.php';
 		require_once 'classes/woocommerce-blocks/paysafecard/PaysafecardCardgate.php';
 		require_once 'classes/woocommerce-blocks/paysafecash/PaysafecashCardgate.php';
 		require_once 'classes/woocommerce-blocks/przelewy24/Przelewy24Cardgate.php';
-		require_once 'classes/woocommerce-blocks/sofortbanking/SofortbankingCardgate.php';
 		require_once 'classes/woocommerce-blocks/spraypay/SpraypayCardgate.php';
 
 		add_action(

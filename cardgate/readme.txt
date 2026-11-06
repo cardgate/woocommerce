@@ -1,10 +1,10 @@
 === CardGate Payments for WooCommerce ===
 Plugin Name: CardGate Payments for WooCommerce
 Contributors: cardgate
-Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, Bancontact, SofortBanking, OverBoeking, PayPal, DirectDebit, Webmoney
+Tags: CardGate, iDEAL, Creditcard, WooCommerce, Payment, Bancontact, OverBoeking, PayPal, DirectDebit, Webmoney
 Requires at least: 4.4
 Tested up to: 7.0
-Stable tag: 4.3.1
+Stable tag: 4.3.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -26,12 +26,10 @@ This plug-in contains the following payment methods from CardGate for WooCommerc
 <li>iDEAL</li>
 <li>iDEAL QR</li>
 <li>Klarna</li>
-<li>OnlineÜberweisen</li>
 <li>PayPal</li>
 <li>Paysafecard</li>
 <li>Paysafecash</li>
 <li>Przelewy24</li>
-<li>Sofortbanking</li>
 <li>SprayPay</li>
 </ul>
 
@@ -72,6 +70,10 @@ If you are updating from an older version then 3.0.4 you will need new [CardGate
 3. Payment settings for a specific CardGate payment method.
 
 == Changelog ==
+
+= 4.3.2 =
+* Removed: Onlineuberweisen
+* Removed: Sofortbanking
 
 = 4.3.1 =
 * Fix: Keep the original (parent) transaction on the subscription for recurring payments
