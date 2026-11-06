@@ -123,9 +123,7 @@ class CGP_Common_Gateway extends WC_Payment_Gateway {
 				'cardgatebancontact',
 				'cardgatebanktransfer',
 				'cardgatebillink',
-				'cardgatesofortbanking',
 				'cardgatedirectdebit',
-				'cardgateonlineueberweisen',
 				'cardgatespraypay',
 			),
 			true
